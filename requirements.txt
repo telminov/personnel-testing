@@ -1,0 +1,7 @@
+Django
+django-mptt==0.7.4
+django-grappelli==2.7.2
+django-extensions==1.5.9
+django-mptt-admin==0.3.0
+gunicorn==19.3.0
+ipython==4.0.0
