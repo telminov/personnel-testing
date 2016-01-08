@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import datetime
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from mptt.models import MPTTModel
@@ -37,7 +36,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Organization(models.Model):
     """ Организация, MobilMed """
     name = models.CharField(max_length=255)
-    director = models.ForeignKey(User, related_name='organizations')
+    director = models.ForeignKey(User, related_name='organizations_director')
+    employees = models.ManyToManyField(User, related_name='organizations')
 
     def __unicode__(self):
         return self.name
@@ -51,7 +51,7 @@ class Department(MPTTModel):
     """ Отдел, MPTT """
     name = models.CharField(max_length=255)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', verbose_name='Родительский отдел')
-    responsible = models.ForeignKey(User, verbose_name='Ответственный')  # TODO m2m
+    responsible = models.ManyToManyField(User, related_name='departments_owner', verbose_name='Ответственные')
     organization = models.ForeignKey(Organization, related_name='departments')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
 
@@ -68,6 +68,9 @@ class Examination(models.Model):
 
     department = models.ForeignKey(Department, related_name='examinations')
 
+    repeat_every = models.PositiveIntegerField(help_text='В днях')
+    duration = models.PositiveIntegerField(help_text='В днях')
+
     started_at = models.DateTimeField(default=datetime.datetime.now, verbose_name='Дата начала тестирования')
     finished_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата окончания тестирования')
 
@@ -82,7 +85,6 @@ class Examination(models.Model):
 class Question(models.Model):
     examination = models.ForeignKey(Examination, related_name='questions')
     name = models.CharField(max_length=255)
-    right_answer = models.ForeignKey('Answer', related_name='questions')  # TODO убрать, ответов много
     time_limit = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -94,7 +96,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, related_name='choices')
+    question = models.ForeignKey(Question, related_name='answers')
     name = models.CharField(max_length=255)
     is_right = models.BooleanField(default=False)
 
@@ -120,6 +122,13 @@ class UserExamination(models.Model):
         verbose_name = 'тестирование пользователя'
         verbose_name_plural = 'Тестирования пользователей'
 
+    def __unicode__(self):
+        return self.name
+
+    @classmethod
+    def get_for_user(cls, user):
+        return cls.objects.filter(user=user)
+
 
 class UserExaminationAnswer(models.Model):
     user_examination = models.ForeignKey(UserExamination, related_name='user_answers')
@@ -133,5 +142,9 @@ class UserExaminationAnswer(models.Model):
     class Meta:
         verbose_name = 'ответы пользователей'
         verbose_name_plural = 'Ответы пользователей'
+
+    @classmethod
+    def get_for_user(cls, user):
+        return cls.objects.filter(user_examination__user=user)
 
 
