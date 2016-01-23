@@ -127,6 +127,26 @@ class UserExamination(models.Model):
         return cls.objects.filter(user=user)
 
 
+class UserExaminationAnswer(models.Model):
+    user_examination = models.ForeignKey(UserExamination, related_name='user_answers')
+
+    question_id = models.ForeignKey(Question, null=True, related_name='user_answers')
+    question_data = JSONField(null=True)
+
+    answers_data = JSONField(null=True)  # set of id with jsonify object with right flag
+
+    started_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+
+    class Meta:
+        verbose_name = 'ответы пользователей'
+        verbose_name_plural = 'Ответы пользователей'
+
+    @classmethod
+    def get_for_user(cls, user):
+        return cls.objects.filter(user_examination__user=user)
+
+
 class UserExaminationLog(models.Model):
     user_examination = models.ForeignKey(UserExamination, on_delete=DO_NOTHING)
 
