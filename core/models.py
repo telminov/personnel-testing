@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.db.models import SET_NULL, DO_NOTHING
+from django_extensions.db.fields.json import JSONField
 from mptt.models import MPTTModel
 
 
@@ -33,26 +35,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Пользователи'
 
 
-class Organization(models.Model):
-    """ Организация, MobilMed """
-    name = models.CharField(max_length=255)
-    director = models.ForeignKey(User, related_name='organizations_director')
-    employees = models.ManyToManyField(User, related_name='organizations')
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'организацию'
-        verbose_name_plural = 'Организации'
-
-
 class Department(MPTTModel):
     """ Отдел, MPTT """
     name = models.CharField(max_length=255)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', verbose_name='Родительский отдел')
     responsible = models.ManyToManyField(User, related_name='departments_owner', verbose_name='Ответственные')
-    organization = models.ForeignKey(Organization, related_name='departments')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
 
     def __unicode__(self):
@@ -94,6 +81,16 @@ class Question(models.Model):
         verbose_name = 'вопрос'
         verbose_name_plural = 'Вопросы'
 
+    @classmethod
+    def get_next_in_examination(cls, examination_id, user_id):
+        return Question.objects.filter(examination=examination_id).exclude(
+            id__in=UserExaminationAnswer.get_for_user(user_id)
+        )
+
+    @classmethod
+    def get_next_id_in_examination(cls, examination_id, user_id):
+        return cls.get_next_in_examination(examination_id, user_id).values_list('id', flat=True)[0]
+
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers')
@@ -130,21 +127,23 @@ class UserExamination(models.Model):
         return cls.objects.filter(user=user)
 
 
-class UserExaminationAnswer(models.Model):
-    user_examination = models.ForeignKey(UserExamination, related_name='user_answers')
-    question = models.ForeignKey(Question, related_name='user_answers')
-    answer = models.ForeignKey(Answer, related_name='user_answers')
-    is_right = models.BooleanField()
+class UserExaminationLog(models.Model):
+    user_examination = models.ForeignKey(UserExamination, on_delete=DO_NOTHING)
 
     started_at = models.DateTimeField()
     finished_at = models.DateTimeField()
 
-    class Meta:
-        verbose_name = 'ответы пользователей'
-        verbose_name_plural = 'Ответы пользователей'
-
     @classmethod
     def get_for_user(cls, user):
-        return cls.objects.filter(user_examination__user=user)
+        return cls.objects.filter(user=user)
 
 
+class UserExaminationQuestionLog(models.Model):
+    user_examination_log = models.ForeignKey(UserExaminationLog)
+    name = models.CharField()
+
+
+class UserExaminationAnswerLog(models.Model):
+    user_examination_question = models.ForeignKey(UserExaminationQuestionLog)
+    name = models.CharField(max_length=255)
+    is_right = models.BooleanField()
