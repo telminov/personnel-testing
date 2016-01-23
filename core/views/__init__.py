@@ -39,10 +39,20 @@ class UserExaminationQuestionDetailView(DetailView):
 
     def get_object(self, queryset=None):
         user_examination = super(UserExaminationQuestionDetailView, self).get_object(queryset)
+        question_id = self.kwargs.get('question_id')
 
-        if not self.kwargs.get('question_id'):
+        if not question_id:
             next_question_id = Question.get_next_id_in_examination(user_examination.examination_id, self.request.user.id)
+            if next_question_id is None:
+                user_examination.started_at = datetime.datetime.now()
+                user_examination.finished_at = datetime.datetime.now()
+
             return redirect(reverse('random_question_from_examination', args=[user_examination.id, next_question_id]))
+
+        self.question = user_examination.examination.questions.get(id=question_id)
+        self.user_examination_question_log = UserExaminationQuestionLog.objects.create(
+            user_examination=user_examination, question=self.question,
+        )
 
         return user_examination
 
@@ -56,14 +66,18 @@ user_examination_question_detail_view = UserExaminationQuestionDetailView.as_vie
 def user_examination_answer_view(request, user_examination_id, question_id):
     answers_ids = request.POST.getlist('answer_id')
 
-    if UserExaminationAnswer.objects.filter(user_examination=user_examination_id, question=question_id).exists():
+    user_examination = UserExamination.get_for_user(request.user).objects.get(id=user_examination_id)
+    user_examination_question = user_examination.examination.questions.get(id=question_id)
+
+    user_examination_question_log = UserExaminationQuestionLog.objects.get(
+        user_examination=user_examination, question=user_examination_question
+    )
+
+    if UserExaminationAnswerLog.objects.filter(user_examination_question_log=user_examination_question_log).exists():
         raise ValueError('Уже есть ответы на вопрос')
 
     if len(answers_ids) < 1:
         raise ValueError('Должен быть хотя бы один ответ')
-
-    user_examination = UserExamination.get_for_user(request.user).objects.get(id=user_examination_id)
-    user_examination_question = user_examination.examination.questions.get(id=question_id)
 
     question_answers = user_examination_question.answers.all()
     question_answers_ids = [qa.id for qa in question_answers]
@@ -79,18 +93,14 @@ def user_examination_answer_view(request, user_examination_id, question_id):
     if len(question_right_answers_ids) == 1 and len(answers_ids) > 1:
         raise ValueError('Может быть только 1 правильный вариант, получено больше одного')
 
-    user_examination_answer_defaults = {'user_examination': user_examination, 'question': user_examination_question}
+    for answer_id in answers_ids:
+        UserExaminationAnswerLog(
+            answer=answer_id, is_right=answer_id in question_right_answers_ids,
+            user_examination_question_log=user_examination_question_log
+        )
 
-
-    UserExaminationLog
-    UserExaminationQuestionLog
-    UserExaminationAnswerLog
-
-    UserExaminationAnswer.objects.bulk_create(
-        [UserExaminationAnswer(
-            answer=answer_id, is_right=answer_id in question_right_answers_ids, **user_examination_answer_defaults
-        ) for answer_id in answers_ids]
-    )
+    user_examination_question_log.finished_at = datetime.datetime.now()
+    user_examination_question_log.save()
 
     redirect_args = [user_examination_id, Question.get_next_id_in_examination(user_examination.examination, request.user)]
     return redirect(reverse(user_examination_question_detail_view, args=redirect_args))

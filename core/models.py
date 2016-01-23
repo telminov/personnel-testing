@@ -89,7 +89,10 @@ class Question(models.Model):
 
     @classmethod
     def get_next_id_in_examination(cls, examination_id, user_id):
-        return cls.get_next_in_examination(examination_id, user_id).values_list('id', flat=True)[0]
+        try:
+            return cls.get_next_in_examination(examination_id, user_id).values_list('id', flat=True)[0]
+        except Exception as e:
+            return None
 
 
 class Answer(models.Model):
@@ -112,8 +115,10 @@ class UserExamination(models.Model):
     available_from = models.DateTimeField(verbose_name='Тест доступен для прохождения от')
     complete_until = models.DateTimeField(verbose_name='Надо выполнить до')
 
+    is_finished = models.BooleanField(default=False)
+
     started_at = models.DateTimeField(verbose_name='Начат')
-    finished_at = models.DateTimeField(verbose_name='Закончен')
+    finished_at = models.DateTimeField(null=True, verbose_name='Закончен')
 
     class Meta:
         verbose_name = 'тестирование пользователя'
@@ -127,43 +132,20 @@ class UserExamination(models.Model):
         return cls.objects.filter(user=user)
 
 
-class UserExaminationAnswer(models.Model):
-    user_examination = models.ForeignKey(UserExamination, related_name='user_answers')
+class UserExaminationQuestionLog(models.Model):
+    user_examination = models.ForeignKey(UserExamination)
+    question = models.ForeignKey(Question)
+    name = models.CharField()
 
-    question_id = models.ForeignKey(Question, null=True, related_name='user_answers')
-    question_data = JSONField(null=True)
-
-    answers_data = JSONField(null=True)  # set of id with jsonify object with right flag
+    question_data = JSONField()
 
     started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
 
-    class Meta:
-        verbose_name = 'ответы пользователей'
-        verbose_name_plural = 'Ответы пользователей'
-
-    @classmethod
-    def get_for_user(cls, user):
-        return cls.objects.filter(user_examination__user=user)
-
-
-class UserExaminationLog(models.Model):
-    user_examination = models.ForeignKey(UserExamination, on_delete=DO_NOTHING)
-
-    started_at = models.DateTimeField()
-    finished_at = models.DateTimeField()
-
-    @classmethod
-    def get_for_user(cls, user):
-        return cls.objects.filter(user=user)
-
-
-class UserExaminationQuestionLog(models.Model):
-    user_examination_log = models.ForeignKey(UserExaminationLog)
-    name = models.CharField()
-
 
 class UserExaminationAnswerLog(models.Model):
-    user_examination_question = models.ForeignKey(UserExaminationQuestionLog)
+    user_examination_question_log = models.ForeignKey(UserExaminationQuestionLog)
     name = models.CharField(max_length=255)
     is_right = models.BooleanField()
+
+    answer = models.ForeignKey(Answer, on_delete=DO_NOTHING)
