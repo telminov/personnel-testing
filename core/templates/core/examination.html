@@ -1,5 +1,25 @@
 {% extends 'core/base.html' %}
 
+{% block sidebar %}
+    <div class="well well-sm">
+        Осталось {{ remains_question_count|default:0 }} вопрос(ов)
+    </div>
+{% endblock sidebar %}
+
 {% block content %}
+    <h4>{{ question.body }}</h4>
+    <hr/>
+
+    <form action="{% url 'user_examination_answer_view' user_examination.id question.id %}"
+          method="POST">{% csrf_token %}
+        {% for answer in answers %}
+            <div class="form-group">
+                <input type="{{ input_type }}" name="answer_id" value="{{ answer.id }}" id="answer{{ answer.id }}">
+                <label for="answer{{ answer.id }}">{{ answer.body }}</label>
+            </div>
+        {% endfor %}
+        <input type="submit" class="btn btn-success" value="Ответить">
+
+    </form>
 
 {% endblock content %}

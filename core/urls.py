@@ -5,8 +5,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('core.views',
-    url(r'^$', 'empty'),
-    url(r'^exams/$', 'user_examination_list_view', name='user_examination_list_view'),
-    url(r'^exams/(?P<user_exam_id>\d+)/$', 'user_examination_detail_view', name='user_examination_detail_view'),
-    url(r'^exams/(?P<user_exam_id>\d+)/go/$', 'user_examination_process_view', name='user_examination_process_view'),
+    url(r'^$', 'user_examination_list_view', name='user_examination_list_view'),
+    url(r'^(?P<user_examination_id>\d+)/$', 'user_examination_question_detail_view', name='user_examination_question_detail_view'),
+    url(r'^(?P<user_examination_id>\d+)/(?P<question_id>\d+)/$', 'user_examination_question_detail_view', name='user_examination_question_detail_view'),
+    url(r'^(?P<user_examination_id>\d+)/(?P<question_id>\d+)/answer/$', 'user_examination_answer_view', name='user_examination_answer_view'),
 )

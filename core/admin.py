@@ -5,11 +5,8 @@ from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
 
-from .models import User, Organization, Department, Examination, Question, Answer, UserExamination, UserExaminationAnswer
-
-
-class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'director', )
+from .models import User, Department, Examination, Question, Answer, UserExamination,\
+    UserExaminationQuestionLog, UserExaminationAnswerLog, Scheduler
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -17,12 +14,11 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class DepartmentAdmin(MPTTModelAdmin):
-    list_display = ('name', 'responsible', )
+    list_display = ('name', )
 
 
 class ExaminationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'department', 'started_at', 'finished_at')
-    list_filter = ('started_at', 'finished_at')
+    list_display = ('name', 'department',)
 
 
 class AnswerInline(admin.StackedInline):
@@ -30,7 +26,7 @@ class AnswerInline(admin.StackedInline):
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('name', )
+    list_display = ('body', )
 
     inlines = [
         AnswerInline
@@ -38,22 +34,35 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('name', )
+    list_display = ('body', )
 
 
 class UserExaminationAdmin(admin.ModelAdmin):
-    list_display = ('examination', )
+    list_display = ('id', 'user', 'examination', )
 
 
 class UserExaminationAnswerAdmin(admin.ModelAdmin):
     list_display = ('user_examination', )
 
 
+class UserExaminationQuestionLogAdmin(admin.ModelAdmin):
+    pass
+
+
+class UserExaminationAnswerLogAdmin(admin.ModelAdmin):
+    pass
+
+
+class SchedulerAdmin(admin.ModelAdmin):
+    list_display = ('user', 'department', 'examination', 'count', 'period', 'unit')
+
+
 admin.site.register(User, UserAdmin)
-admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(Examination, ExaminationAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(UserExamination, UserExaminationAdmin)
-admin.site.register(UserExaminationAnswer, UserExaminationAnswerAdmin)
+admin.site.register(UserExaminationQuestionLog, UserExaminationQuestionLogAdmin)
+admin.site.register(UserExaminationAnswerLog, UserExaminationAnswerLogAdmin)
+admin.site.register(Scheduler, SchedulerAdmin)

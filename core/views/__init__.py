@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.contrib import messages
 
 from django.core.urlresolvers import reverse
+from django.forms import model_to_dict
+from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import ListView, DetailView, CreateView
 
@@ -18,55 +21,72 @@ class UserExaminationListView(ListView):
     context_object_name = 'user_examinations'
 
     def get_queryset(self):
-        return self.model.get_for_user(self.request.user)
-user_examination_list_view = UserExaminationListView.as_view()
-
-
-class UserExaminationDetailView(DetailView):
-    model = UserExamination
-    template_name = 'core/examination.html'
+        return self.model.get_for_user(self.request.user.id).filter(finished_at__isnull=True)
 
     def get_context_data(self, **kwargs):
-        context = super(UserExaminationDetailView, self).get_context_data(**kwargs)
-        context['questions'] = Question.objects.filter(examination=self.object.examination_id)
+        context = super(UserExaminationListView, self).get_context_data(**kwargs)
+        context['user_examinations_finished'] = self.model.get_for_user(self.request.user).filter(finished_at__isnull=False)
         return context
-user_examination_detail_view = UserExaminationDetailView.as_view()
+
+user_examination_list_view = UserExaminationListView.as_view()
 
 
 class UserExaminationQuestionDetailView(DetailView):
     model = UserExamination
+    context_object_name = 'user_examination'
     pk_url_kwarg = 'user_examination_id'
+    template_name = 'core/examination.html'
 
-    def get_object(self, queryset=None):
-        user_examination = super(UserExaminationQuestionDetailView, self).get_object(queryset)
+    def dispatch(self, request, *args, **kwargs):
+
+        user_examination = self.get_object()
+        if user_examination.started_at is None:
+            user_examination.started_at = datetime.datetime.now()
+            user_examination.save()
+
         question_id = self.kwargs.get('question_id')
 
         if not question_id:
-            next_question_id = Question.get_next_id_in_examination(user_examination.examination_id, self.request.user.id)
+            next_question_id = Question.get_next_id_in_examination(user_examination)
             if next_question_id is None:
-                user_examination.started_at = datetime.datetime.now()
                 user_examination.finished_at = datetime.datetime.now()
+                user_examination.save()
+                messages.success(request, 'Тестирование %s завершено' % user_examination.examination.name)
+                return redirect(reverse('user_examination_list_view'))
 
-            return redirect(reverse('random_question_from_examination', args=[user_examination.id, next_question_id]))
+            return redirect(reverse(user_examination_question_detail_view, args=[user_examination.id, next_question_id]))
 
-        self.question = user_examination.examination.questions.get(id=question_id)
-        self.user_examination_question_log = UserExaminationQuestionLog.objects.create(
-            user_examination=user_examination, question=self.question,
-        )
+        else:
+            self.question = user_examination.examination.questions.get(id=question_id)
+            self.user_examination_question_log, _ = UserExaminationQuestionLog.objects.get_or_create(
+                user_examination=user_examination, question=self.question,
+                defaults={'question_data': model_to_dict(self.question)}
+            )
 
+            if self.user_examination_question_log.user_examination_answer_logs.exists():
+                raise Http404
+
+            return super(UserExaminationQuestionDetailView, self).dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        user_examination_qs = UserExamination.get_for_user(self.request.user).filter(finished_at__isnull=True)
+        user_examination = super(UserExaminationQuestionDetailView, self).get_object(user_examination_qs)
         return user_examination
 
     def get_context_data(self, **kwargs):
         context = super(UserExaminationQuestionDetailView, self).get_context_data(**kwargs)
-        context['question'] = self.object.examination.question
+        context['question'] = self.question
+        context['answers'] = self.question.answers.all()
+        context['input_type'] = 'radio' if self.question.answers.filter(is_right=True).count() == 1 else 'checkbox'
+        context['remains_question_count'] = Question.get_remains_for_user_examination(self.object).count()
         return context
 user_examination_question_detail_view = UserExaminationQuestionDetailView.as_view()
 
 
 def user_examination_answer_view(request, user_examination_id, question_id):
-    answers_ids = request.POST.getlist('answer_id')
+    answers_ids = map(int, request.POST.getlist('answer_id'))
 
-    user_examination = UserExamination.get_for_user(request.user).objects.get(id=user_examination_id)
+    user_examination = UserExamination.get_for_user(request.user).get(finished_at__isnull=True, id=user_examination_id)
     user_examination_question = user_examination.examination.questions.get(id=question_id)
 
     user_examination_question_log = UserExaminationQuestionLog.objects.get(
@@ -94,13 +114,13 @@ def user_examination_answer_view(request, user_examination_id, question_id):
         raise ValueError('Может быть только 1 правильный вариант, получено больше одного')
 
     for answer_id in answers_ids:
-        UserExaminationAnswerLog(
-            answer=answer_id, is_right=answer_id in question_right_answers_ids,
-            user_examination_question_log=user_examination_question_log
+        answer = Answer.objects.get(id=answer_id)
+        UserExaminationAnswerLog.objects.create(
+            answer=answer, is_right=answer_id in question_right_answers_ids,
+            user_examination_question_log=user_examination_question_log, answer_data=model_to_dict(answer)
         )
 
     user_examination_question_log.finished_at = datetime.datetime.now()
     user_examination_question_log.save()
 
-    redirect_args = [user_examination_id, Question.get_next_id_in_examination(user_examination.examination, request.user)]
-    return redirect(reverse(user_examination_question_detail_view, args=redirect_args))
+    return redirect(reverse(user_examination_question_detail_view, args=[user_examination_id]))
