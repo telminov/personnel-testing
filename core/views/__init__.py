@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from collections import defaultdict
 from django.contrib import messages
 
 from django.core.urlresolvers import reverse
@@ -36,6 +37,8 @@ class UserExaminationQuestionDetailView(DetailView):
     context_object_name = 'user_examination'
     pk_url_kwarg = 'user_examination_id'
     template_name = 'core/examination.html'
+    question = None
+    user_examination_question_log = None
 
     def dispatch(self, request, *args, **kwargs):
 
@@ -46,17 +49,7 @@ class UserExaminationQuestionDetailView(DetailView):
 
         question_id = self.kwargs.get('question_id')
 
-        if not question_id:
-            next_question_id = Question.get_next_id_in_examination(user_examination)
-            if next_question_id is None:
-                user_examination.finished_at = datetime.datetime.now()
-                user_examination.save()
-                messages.success(request, 'Тестирование %s завершено' % user_examination.examination.name)
-                return redirect(reverse('user_examination_list_view'))
-
-            return redirect(reverse(user_examination_question_detail_view, args=[user_examination.id, next_question_id]))
-
-        else:
+        if question_id:
             self.question = user_examination.examination.questions.get(id=question_id)
             self.user_examination_question_log, _ = UserExaminationQuestionLog.objects.get_or_create(
                 user_examination=user_examination, question=self.question,
@@ -67,6 +60,17 @@ class UserExaminationQuestionDetailView(DetailView):
                 raise Http404
 
             return super(UserExaminationQuestionDetailView, self).dispatch(request, *args, **kwargs)
+        else:
+            next_question_id = Question.get_next_id_in_examination(user_examination)
+
+            if next_question_id is None:
+                user_examination.finished_at = datetime.datetime.now()
+                user_examination.calculate_points(commit=False)
+                user_examination.save()
+                messages.success(request, 'Тестирование %s завершено' % user_examination.examination.name)
+                return redirect(reverse('user_examination_list_view'))
+            else:
+                return redirect(reverse(user_examination_question_detail_view, args=[user_examination.id, next_question_id]))
 
     def get_object(self, queryset=None):
         user_examination_qs = UserExamination.get_for_user(self.request.user).filter(finished_at__isnull=True)
@@ -81,6 +85,30 @@ class UserExaminationQuestionDetailView(DetailView):
         context['remains_question_count'] = Question.get_remains_for_user_examination(self.object).count()
         return context
 user_examination_question_detail_view = UserExaminationQuestionDetailView.as_view()
+
+
+class UserExaminationDetailView(DetailView):
+    model = UserExamination
+    pk_url_kwarg = 'user_examination_id'
+
+    def get_queryset(self):
+        return UserExamination.get_for_user(self.request.user)
+
+    def get_answer_log(self, question_log_qs):
+        answer_log_objects = defaultdict(list)
+        answer_log_qs = UserExaminationAnswerLog.objects.filter(user_examination_question_log__in=question_log_qs)
+        for answer_log in answer_log_qs:
+            answer_log_objects[answer_log.user_examination_question_log_id].append(answer_log)
+        return answer_log_objects
+
+    def get_context_data(self, **kwargs):
+        context = super(UserExaminationDetailView, self).get_context_data(**kwargs)
+        question_log_qs = UserExaminationQuestionLog.objects.filter(user_examination=self.object)
+        context['question_log'] = question_log_qs
+        context['answer_log'] = self.get_answer_log(question_log_qs)
+        return context
+
+user_examination_detail_view = UserExaminationDetailView
 
 
 def user_examination_answer_view(request, user_examination_id, question_id):

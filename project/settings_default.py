@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     'django_mptt_admin',
     'mptt',
 
+    'auth2',
     'core',
 )
 
@@ -37,6 +38,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'auth2.middleware.LoginRequiredMiddleware'
 )
 
 ROOT_URLCONF = 'project.urls'
@@ -50,6 +52,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],

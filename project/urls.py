@@ -11,9 +11,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^', include('core.urls')),
+    url(r'^', include('auth2.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
     url(r'^grppll/', include('grappelli.urls')),
 )
 

@@ -140,8 +140,18 @@ class UserExamination(models.Model):
     def get_for_user(cls, user):
         return cls.objects.filter(user=user)
 
-    def calculate(self):
+    def get_status_color(self):
+        if self.points >= 70:
+            return 'success'
+        else:
+            return 'warning'
+
+    def calculate_points(self, force=False, commit=True):
         assert self.finished_at
+
+        # dont allow recalculate points, if already exists(user exam was finished)
+        if not force:
+            assert self.points == 0
 
         points = 0
 
@@ -158,7 +168,11 @@ class UserExamination(models.Model):
                 points += point_for_one_right_answer * float(right_answers_count) / right_answers_user_count
 
         self.points = points
-        self.save()
+
+        if commit:
+            self.save()
+
+        return self
 
 
 class UserExaminationQuestionLog(models.Model):

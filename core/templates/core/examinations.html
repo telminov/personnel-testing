@@ -37,20 +37,24 @@
         <th>Тестирование</th>
         <th>Начато</th>
         <th>Закончено</th>
+        <th>Баллы</th>
     </tr>
     </thead>
     <tbody>
 
     {% for user_examination in user_examinations_finished %}
-        <tr class="success">
+        <tr class="{{ user_examination.get_status_color }}">
             <td>
-                {{ user_examination.examination.name }}
+                <a href="{% url 'user_examination_detail_view' user_examination.id %}">{{ user_examination.examination.name }}</a>
             </td>
             <td>
                 {{ user_examination.started_at }}
             </td>
             <td>
                 {{ user_examination.finished_at }}
+            </td>
+            <td>
+                {{ user_examination.points }}/100
             </td>
         </tr>
 
