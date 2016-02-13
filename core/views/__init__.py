@@ -90,6 +90,8 @@ user_examination_question_detail_view = UserExaminationQuestionDetailView.as_vie
 class UserExaminationDetailView(DetailView):
     model = UserExamination
     pk_url_kwarg = 'user_examination_id'
+    context_object_name = 'user_examination'
+    template_name = 'core/examination_detail.html'
 
     def get_queryset(self):
         return UserExamination.get_for_user(self.request.user)
@@ -108,7 +110,7 @@ class UserExaminationDetailView(DetailView):
         context['answer_log'] = self.get_answer_log(question_log_qs)
         return context
 
-user_examination_detail_view = UserExaminationDetailView
+user_examination_detail_view = UserExaminationDetailView.as_view()
 
 
 def user_examination_answer_view(request, user_examination_id, question_id):
@@ -152,3 +154,13 @@ def user_examination_answer_view(request, user_examination_id, question_id):
     user_examination_question_log.save()
 
     return redirect(reverse(user_examination_question_detail_view, args=[user_examination_id]))
+
+
+class DepartmentUsersReportListView(ListView):
+    model = Department
+    template_name = 'core/department_users_report.html'
+    context_object_name = 'departments_owner'
+
+    def get_queryset(self):
+        return self.request.user.departments_owner.all()
+department_users_report_list_view = DepartmentUsersReportListView.as_view()

@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+    {% for department in departments_owner %}
+        <h2>{{ department }}</h2>
+
+    {% for department_user in department.employees.all %}
+
+        <h3>{{ department_user }}</h3>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Тестирование</th>
+                <th>Начато</th>
+                <th>Закончено</th>
+                <th>Баллы</th>
+            </tr>
+        </thead>
+    <tbody>
+
+    {% for user_examination in department_user.user_examinations.all %}
+        <tr class="{{ user_examination.get_status_color }}">
+            <td>
+                <a href="{% url 'user_examination_detail_view' user_examination.id %}">{{ user_examination.examination.name }}</a>
+            </td>
+            <td>
+                {{ user_examination.started_at|default:'Не начато' }}
+            </td>
+            <td>
+                {{ user_examination.finished_at|default:'Не закончено' }}
+            </td>
+            <td>
+                {{ user_examination.points }}/100
+            </td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+    </table>
+
+    {% endfor %}
+    {% endfor %}
+
+{% endblock content %}

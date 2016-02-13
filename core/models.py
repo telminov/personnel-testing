@@ -93,7 +93,7 @@ class Question(models.Model):
         return Question.objects.filter(examination=user_examination.examination).exclude(
             id__in=UserExaminationQuestionLog.objects.filter(
                 user_examination=user_examination, user_examination_answer_logs__isnull=False,
-            ).values_list('question', flat=True)
+            ).values_list('question', flat=True).order_by('?')
         )
 
     @classmethod
