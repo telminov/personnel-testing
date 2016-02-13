@@ -10,6 +10,8 @@
                 <th>Начато</th>
                 <th>Закончено</th>
                 <th>Баллы</th>
+                <th>Правильные</th>
+                <th>Не правильные</th>
             </tr>
         </thead>
     <tbody>
@@ -22,7 +24,19 @@
                 {{ user_examination.finished_at|default:'Не закончено' }}
             </td>
             <td>
-                {{ user_examination.points }}/100
+                {% if not user_examination.finished_at %}
+                    <abbr style="color: lightgray" title="Баллы начисляются только после прохождения тестирования">
+                        {{ user_examination.points }}/100
+                    </abbr>
+                {% else %}
+                    {{ user_examination.points }}/100
+                {% endif %}
+            </td>
+            <td>
+                {{ user_examinations_stats.right_answers_count }}
+            </td>
+            <td>
+                {{ user_examinations_stats.invalid_answers_count }}
             </td>
         </tr>
 

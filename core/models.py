@@ -127,7 +127,7 @@ class UserExamination(models.Model):
     points = models.PositiveSmallIntegerField(default=0, verbose_name='Баллы')
 
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='Начат')
-    finished_at = models.DateTimeField(null=True, blank=True, verbose_name='Закончен')
+    finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
 
     class Meta:
         verbose_name = 'тестирование пользователя'

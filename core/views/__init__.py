@@ -92,22 +92,51 @@ class UserExaminationDetailView(DetailView):
     pk_url_kwarg = 'user_examination_id'
     context_object_name = 'user_examination'
     template_name = 'core/examination_detail.html'
+    _question_log_qs = None
+    _answer_log_qs = None
 
     def get_queryset(self):
-        return UserExamination.get_for_user(self.request.user)
+        if self.request.user.is_superuser or self.request.user.is_staff:  # todo is_staff and department owner
+            return super(UserExaminationDetailView, self).get_queryset()
+        else:
+            return UserExamination.get_for_user(self.request.user)
 
-    def get_answer_log(self, question_log_qs):
+    def get_answer_log_qs(self):
+        if self._answer_log_qs is None:
+            self._answer_log_qs = UserExaminationAnswerLog.objects.filter(user_examination_question_log__in=self.get_question_log())
+        return self._answer_log_qs
+
+    def get_question_log(self):
+        if self._question_log_qs is None:
+            self._question_log_qs = UserExaminationQuestionLog.objects.filter(user_examination=self.object)
+        return self._question_log_qs
+
+    def get_answer_log_for_question_log(self):
         answer_log_objects = defaultdict(list)
-        answer_log_qs = UserExaminationAnswerLog.objects.filter(user_examination_question_log__in=question_log_qs)
+        answer_log_qs = self.get_answer_log_qs()
         for answer_log in answer_log_qs:
             answer_log_objects[answer_log.user_examination_question_log_id].append(answer_log)
         return answer_log_objects
 
+    def get_answers_stats(self):
+        stats = {
+            'right_answers_count': 0,
+            'invalid_answers_count': 0
+        }
+
+        for answer_log in self.get_answer_log_qs():
+            if answer_log.answer_data['is_right']:
+                stats['right_answers_count'] += 1
+            else:
+                stats['invalid_answers_count'] += 1
+
+        return stats
+
     def get_context_data(self, **kwargs):
         context = super(UserExaminationDetailView, self).get_context_data(**kwargs)
-        question_log_qs = UserExaminationQuestionLog.objects.filter(user_examination=self.object)
-        context['question_log'] = question_log_qs
-        context['answer_log'] = self.get_answer_log(question_log_qs)
+        context['question_log'] = self.get_question_log()
+        context['answer_log'] = self.get_answer_log_for_question_log()
+        context['user_examinations_stats'] = self.get_answers_stats()
         return context
 
 user_examination_detail_view = UserExaminationDetailView.as_view()
