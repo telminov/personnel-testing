@@ -122,7 +122,7 @@ class UserExamination(models.Model):
     user = models.ForeignKey(User, related_name='user_examinations', verbose_name='Пользователь')
 
     available_from = models.DateTimeField(verbose_name='Тест доступен для прохождения от')
-    complete_until = models.DateTimeField(verbose_name='Надо выполнить до')
+    complete_until = models.DateTimeField(db_index=True, verbose_name='Надо выполнить до')
 
     points = models.PositiveSmallIntegerField(default=0, verbose_name='Баллы')
 
@@ -139,6 +139,11 @@ class UserExamination(models.Model):
     @classmethod
     def get_for_user(cls, user):
         return cls.objects.filter(user=user)
+
+    @classmethod
+    def fixed_expired(cls):
+        now = datetime.datetime.now()
+        UserExamination.objects.filter(finished_at__isnull=True, complete_until__lt=now).update(finished_at=now)
 
     def get_status_color(self):
         if self.points >= 70:
