@@ -22,8 +22,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'django_extensions',
-    'django_mptt_admin',
-    'mptt',
 
     'auth2',
     'core',
@@ -57,6 +55,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'builtins': ['core.templatetags.core']
         },
     },
 ]

@@ -143,7 +143,7 @@ user_examination_detail_view = UserExaminationDetailView.as_view()
 
 
 def user_examination_answer_view(request, user_examination_id, question_id):
-    answers_ids = map(int, request.POST.getlist('answer_id'))
+    answers_ids = [int(answer_id) for answer_id in request.POST.getlist('answer_id')]
 
     user_examination = UserExamination.get_for_user(request.user).get(finished_at__isnull=True, id=user_examination_id)
     user_examination_question = user_examination.examination.questions.get(id=question_id)

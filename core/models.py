@@ -37,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Пользователи'
 
 
-class Department(MPTTModel):
+class Department(models.Model):
     """ Отдел, MPTT """
     name = models.CharField(max_length=255, verbose_name='Название')
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', verbose_name='Родительский отдел')
@@ -80,8 +80,6 @@ class Question(models.Model):
         user_examination_question_log = UserExaminationQuestionLog.objects.filter(
             user_examination=user_examination, user_examination_answer_logs__isnull=False
         )
-
-        print user_examination_question_log
 
         return Question.objects.filter(examination=user_examination.examination).exclude(
             id__in=user_examination_question_log.values_list('question', flat=True)
