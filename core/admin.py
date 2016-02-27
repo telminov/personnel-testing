@@ -13,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('email', 'username', )
 
 
-class DepartmentAdmin(MPTTModelAdmin):
+class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', )
 
 

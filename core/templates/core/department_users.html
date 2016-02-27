@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Аттестаций</th>
+                <th>Не пройденые</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for user in users %}
+
+            <tr>
+                <td>
+                    <a href="{% url 'department_user_examinations_list_view' department.id user.id %}">{{ user }}</a>
+                </td>
+                <td>
+                    {{ user.user_examinations.count }}
+                </td>
+                <td>
+                    {{ user.get_expired_examinations.count }}
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock content %}

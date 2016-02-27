@@ -27,7 +27,7 @@ def login(request):
     """
     Почти полная копия стандартного login
     """
-    redirect_to = request.REQUEST.get('next', '')
+    redirect_to = request.GET.get('next', '')
 
     form = LoginForm(data=request.POST or None, request=request)
     if form.is_valid():

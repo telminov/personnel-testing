@@ -185,11 +185,64 @@ def user_examination_answer_view(request, user_examination_id, question_id):
     return redirect(reverse(user_examination_question_detail_view, args=[user_examination_id]))
 
 
-class DepartmentUsersReportListView(ListView):
+class DepartmentsListView(ListView):
     model = Department
-    template_name = 'core/department_users_report.html'
-    context_object_name = 'departments_owner'
+    template_name = 'core/departments.html'
+    context_object_name = 'departments'
 
     def get_queryset(self):
         return self.request.user.departments_owner.all()
-department_users_report_list_view = DepartmentUsersReportListView.as_view()
+departments_list_view = DepartmentsListView.as_view()
+
+
+class DepartmentUsersListView(ListView):
+    model = User
+    context_object_name = 'users'
+    template_name = 'core/department_users.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DepartmentUsersListView, self).get_context_data(**kwargs)
+        context['department'] = self.request.user.departments_owner.get(id=self.kwargs['department_id'])
+        return context
+
+    def get_queryset(self):
+        return self.model.objects.filter(departments__in=[self.kwargs['department_id']])
+
+department_users_list_view = DepartmentUsersListView.as_view()
+
+
+class DepartmentUserExaminationsListView(ListView):
+    model = UserExamination
+    context_object_name = 'user_examinations'
+    template_name = 'core/department_user_examinations.html'
+    _user = None
+    _department = None
+
+    def get_department(self):
+        if not self._department:
+            self._department = self.request.user.departments_owner.get(id=self.kwargs['department_id'])
+        return self._department
+
+    def get_user(self):
+        if not self._user:
+            department = self.get_department()
+            self._user = department.employees.get(id=self.kwargs['user_id'])
+        return self._user
+
+    def get_context_data(self, **kwargs):
+        context = super(DepartmentUserExaminationsListView, self).get_context_data(**kwargs)
+        context['department'] = self.get_department()
+        context['user'] = self.get_user()
+        return context
+
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.get_user())
+
+department_user_examinations_list_view = DepartmentUserExaminationsListView.as_view()
+
+
+class UserExaminationReportListView(ListView):
+    model = UserExamination
+    context_object_name = 'user_examinations'
+    template_name = 'core/user_examination_report.html'
+user_examination_report_list_view = UserExaminationReportListView.as_view()

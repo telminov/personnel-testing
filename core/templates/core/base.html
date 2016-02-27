@@ -19,7 +19,8 @@
             <ul class="nav navbar-nav" style="width: 100%">
                 <li class=""><a href="/">Главная</a></li>
                 {% if user.is_staff %}
-                <li class=""><a href="/report/">Отчеты по прохождениям</a></li>
+                <li class=""><a href="{% url 'departments_list_view' %}">Отчеты по прохождениям</a></li>
+                <li class=""><a href="{% url 'user_examination_report_list_view' %}">Список аттестаций</a></li>
                 {% endif %}
                 <li class="dropdown pull-right">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user }} <span class="caret"></span></a>
@@ -40,26 +41,26 @@
 {% endif %}
 
     <div class="content">
-        <div class="col-lg-10">
+        <div class="col-lg-12">
         {% block content %}
         {% endblock content %}
         </div>
-    <div class="col-lg-2">
-        {% block sidebar %}
-        {% endblock sidebar %}
-        <div class="well well-sm">
-            <h4>Привет</h4>
-            <span>Я небольшая новость или подсказка</span>
-        </div>
-        <div class="well well-sm">
-            <div class="row">
-            <a class="col-lg-12" href="#">Набор ссылок</a>
-            <a class="col-lg-12" href="#">Набор ссылок</a>
-            <a class="col-lg-12" href="#">Набор ссылок</a>
-            <a class="col-lg-12" href="#">Набор ссылок</a>
-                </div>
-        </div>
-    </div>
+{#    <div class="col-lg-2">#}
+{#        {% block sidebar %}#}
+{#        {% endblock sidebar %}#}
+{#        <div class="well well-sm">#}
+{#            <h4>Привет</h4>#}
+{#            <span>Я небольшая новость или подсказка</span>#}
+{#        </div>#}
+{#        <div class="well well-sm">#}
+{#            <div class="row">#}
+{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
+{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
+{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
+{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
+{#                </div>#}
+{#        </div>#}
+{#    </div>#}
     </div>
 </div>
 

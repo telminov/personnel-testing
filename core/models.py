@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
-from django.db.models import SET_NULL, DO_NOTHING
+from django.db.models import SET_NULL, DO_NOTHING, Q
 from django_extensions.db.fields.json import JSONField
 from mptt.models import MPTTModel
 
@@ -16,12 +16,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField()
+    date_joined = models.DateTimeField(default=datetime.datetime.now)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    def __unicode__(self):
+        return self.get_full_name()
+
+    def __str__(self):
+        return self.get_full_name()
+
+    class Meta:
+        verbose_name = 'пользователя'
+        verbose_name_plural = 'Пользователи'
 
     def get_full_name(self):
         return self.username
@@ -29,12 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.username
 
-    def __unicode__(self):
-        return self.get_full_name()
-
-    class Meta:
-        verbose_name = 'пользоватя'
-        verbose_name_plural = 'Пользователи'
+    def get_expired_examinations(self):
+        return self.user_examinations.filter(Q(points=0) | Q(started_at__isnull=True))
 
 
 class Department(models.Model):
@@ -45,6 +51,9 @@ class Department(models.Model):
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -59,6 +68,9 @@ class Examination(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = 'тестирование'
         verbose_name_plural = 'Тестирования'
@@ -69,6 +81,9 @@ class Question(models.Model):
     body = models.TextField(verbose_name='Текст')
 
     def __unicode__(self):
+        return self.body
+
+    def __str__(self):
         return self.body
 
     class Meta:
@@ -110,6 +125,9 @@ class Answer(models.Model):
     def __unicode__(self):
         return '[%s] %s' % (self.id, self.body)
 
+    def __str__(self):
+        return '[%s] %s' % (self.id, self.body)
+
     class Meta:
         verbose_name = 'ответ'
         verbose_name_plural = 'Ответы на вопросы'
@@ -134,8 +152,11 @@ class UserExamination(models.Model):
     def __unicode__(self):
         return '[UserExamination] #%s' % self.id
 
+    def __str__(self):
+        return '[UserExamination] #%s' % self.id
+
     @classmethod
-    def get_for_user(cls, user):
+    def get_for_user(cls, user, qs=None):
         return cls.objects.filter(user=user)
 
     @classmethod
@@ -148,6 +169,12 @@ class UserExamination(models.Model):
             return 'success'
         else:
             return 'warning'
+
+    def is_expired(self):
+        return self.points == 0 or self.started_at is None
+
+    def is_not_passed(self):
+        return self.points < 70
 
     def calculate_points(self, force=False, commit=True):
         assert self.finished_at
@@ -182,7 +209,7 @@ class UserExaminationQuestionLog(models.Model):
     user_examination = models.ForeignKey(UserExamination, related_name='user_examination_question_logs')
     question = models.ForeignKey(Question, on_delete=DO_NOTHING, related_name='user_examination_question_logs')
 
-    question_data = JSONField()
+    question_data = JSONField(default={})
 
     started_at = models.DateTimeField(default=datetime.datetime.now)
     finished_at = models.DateTimeField(null=True)
@@ -192,6 +219,9 @@ class UserExaminationQuestionLog(models.Model):
     #     verbose_name_plural = 'Ответы пользователей'
 
     def __unicode__(self):
+        return unicode(self.id)
+
+    def __str__(self):
         return unicode(self.id)
 
 
@@ -207,6 +237,9 @@ class UserExaminationAnswerLog(models.Model):
     #     verbose_name_plural = 'Ответы пользователей(конкретно)'
 
     def __unicode__(self):
+        return unicode(self.id)
+
+    def __str__(self):
         return unicode(self.id)
 
 

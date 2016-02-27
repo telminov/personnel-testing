@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Тестирование</th>
+                <th>Баллы</th>
+                <th>Начато</th>
+                <th>Закончено</th>
+            </tr>
+        </thead>
+    <tbody>
+
+    {% for user_examination in user_examinations %}
+
+        <tr class="{% if user_examination.is_expired %}danger{% elif user_examination.is_not_passed %}warning{% endif %}">
+            <td>
+                {{ user_examination.user }}
+            </td>
+            <td>
+                {{ user_examination.examination }}
+            </td>
+            <td>
+                <a href="{% url 'user_examination_detail_view' user_examination.id %}">{{ user_examination.points }}</a>
+            </td>
+            <td>
+                {{ user_examination.started_at|default:'Не начато' }}
+            </td>
+            <td>
+                {{ user_examination.finished_at|default:'Не закончено' }}
+            </td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock content %}

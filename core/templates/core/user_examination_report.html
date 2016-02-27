@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Тестирование</th>
+                <th>Баллы</th>
+                <th>Выполнять с</th>
+                <th>Закончить выполнение</th>
+                <th>Начато</th>
+                <th>Закончено</th>
+            </tr>
+        </thead>
+    <tbody>
+
+    {% for user_examination in user_examinations %}
+
+        <tr class="{% if user_examination.is_expired %}danger{% elif user_examination.is_not_passed %}warning{% else %}success{% endif %}">
+            <td>
+                {{ user_examination.user }}
+            </td>
+            <td>
+                {{ user_examination.examination }}
+            </td>
+            <td>
+                {{ user_examination.points }}
+            </td>
+            <td>
+                {{ user_examination.available_from }}
+            </td>
+            <td>
+                {{ user_examination.complete_until }}
+            </td>
+            <td>
+                {{ user_examination.started_at|default:'Не начато' }}
+            </td>
+            <td>
+                {{ user_examination.finished_at|default:'Не закончено' }}
+            </td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock content %}
