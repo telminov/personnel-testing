@@ -7,6 +7,26 @@ from django.test import TestCase
 
 class MainTestCase(TestCase):
 
+    def test_scheduler_get_datetime_for_check_period(self):
+        department = Department.objects.create(name='test dep')
+        examination = Examination.objects.create(name='test exam', department=department)
+        scheduler = Scheduler.objects.create(
+            examination=examination, count=1, period=1, unit=Scheduler.WEEK_UNIT_CHOICE
+        )
+
+        self.assertEqual(
+            scheduler.get_datetime_for_check_period().date(),
+            (datetime.datetime.now() - datetime.timedelta(days=7)).date()
+        )
+
+        scheduler.period = 2
+        scheduler.save()
+
+        self.assertEqual(
+            scheduler.get_datetime_for_check_period().date(),
+            (datetime.datetime.now() - datetime.timedelta(days=14)).date()
+        )
+
     def test_user_examination_calculate_points(self):
         department = Department.objects.create(name='test dep')
         examination = Examination.objects.create(name='test exam', department=department)
