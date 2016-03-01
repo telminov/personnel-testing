@@ -27,6 +27,9 @@ class MainTestCase(TestCase):
             (datetime.datetime.now() - datetime.timedelta(days=14)).date()
         )
 
+    def test_scheduler_check_user_examinations(self):
+        pass
+
     def test_user_examination_calculate_points(self):
         department = Department.objects.create(name='test dep')
         examination = Examination.objects.create(name='test exam', department=department)
@@ -91,3 +94,28 @@ class MainTestCase(TestCase):
         user_examination.calculate_points(force=True)
 
         self.assertEqual(user_examination.points, 100)
+
+    def test_user_examination_fixed_expired(self):
+        department = Department.objects.create(name='test dep')
+        examination = Examination.objects.create(name='test exam', department=department)
+        user = User.objects.create(username='test', email='admin@admin.com')
+        department.employees.add(user)
+
+        available_from = datetime.datetime.now() - datetime.timedelta(days=2)
+        complete_until = datetime.datetime.now() - datetime.timedelta(days=1)
+        user_examination = UserExamination.objects.create(
+            examination=examination, user=user, available_from=available_from, complete_until=complete_until,
+        )
+
+        UserExamination.fixed_expired()
+
+        self.assertIsNotNone(UserExamination.objects.get(id=user_examination.id).finished_at)
+
+    def test_question_get_remains_for_user_examination(self):
+        pass
+
+    def test_question_get_next_in_examination(self):
+        pass
+
+    def test_question_get_next_id_in_examination(self):
+        pass
