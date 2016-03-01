@@ -2,3 +2,5 @@ project/settings.py
 .idea/
 *.pyc
 *.sqlite3
+virt_env
+virtualenv

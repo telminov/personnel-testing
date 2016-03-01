@@ -13,7 +13,6 @@ urlpatterns = [
     url(r'^', include('auth2.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^grppll/', include('grappelli.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

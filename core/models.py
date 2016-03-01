@@ -1,13 +1,43 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import datetime
+import json
+
+import six
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.db.models import SET_NULL, DO_NOTHING, Q
-from django_extensions.db.fields.json import JSONField
-from mptt.models import MPTTModel
+
+
+class JSONField(models.TextField):
+    def __init__(self, *args, **kwargs):
+        default = kwargs.get('default', '{}')
+        if isinstance(default, (list, dict)):
+            kwargs['default'] = json.dumps(default)
+        models.TextField.__init__(self, *args, **kwargs)
+
+    def to_python(self, value):
+        """Convert our string value to JSON after we load it from the DB"""
+        if value is None or value == '':
+            return {}
+        return json.loads(value)
+
+    def get_db_prep_save(self, value, connection, **kwargs):
+        """Convert our JSON object to a string before we save"""
+        if value is None and self.null:
+            return None
+        # default values come in as strings; only non-strings should be
+        # run through `dumps`
+        if not isinstance(value, six.string_types):
+            value = json.dumps(value)
+        return value
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(JSONField, self).deconstruct()
+        if self.default == '{}':
+            del kwargs['default']
+        return name, path, args, kwargs
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -16,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(default=datetime.datetime.now)
+    date_joined = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
 
@@ -44,7 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Department(models.Model):
-    """ Отдел, MPTT """
+    """ Отдел """
     name = models.CharField(max_length=255, verbose_name='Название')
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', verbose_name='Родительский отдел')
     responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True, verbose_name='Ответственные')
@@ -153,7 +183,7 @@ class UserExamination(models.Model):
         return '[UserExamination] #%s' % self.id
 
     def __str__(self):
-        return '[UserExamination] #%s' % self.id
+        return '#%s' % self.id
 
     @classmethod
     def get_for_user(cls, user, qs=None):
@@ -211,18 +241,12 @@ class UserExaminationQuestionLog(models.Model):
 
     question_data = JSONField(default={})
 
-    started_at = models.DateTimeField(default=datetime.datetime.now)
+    started_at = models.DateTimeField(auto_now=True)
     finished_at = models.DateTimeField(null=True)
 
     # class Meta:
     #     verbose_name = 'ответ пользователя'
     #     verbose_name_plural = 'Ответы пользователей'
-
-    def __unicode__(self):
-        return unicode(self.id)
-
-    def __str__(self):
-        return unicode(self.id)
 
 
 class UserExaminationAnswerLog(models.Model):
@@ -236,17 +260,14 @@ class UserExaminationAnswerLog(models.Model):
     #     verbose_name = 'ответ пользователя(конкретно)'
     #     verbose_name_plural = 'Ответы пользователей(конкретно)'
 
-    def __unicode__(self):
-        return unicode(self.id)
-
-    def __str__(self):
-        return unicode(self.id)
-
 
 class Scheduler(models.Model):
+    WEEK_UNIT_CHOICE = 'week'
+    MONTH_UNIT_CHOICE = 'month'
+
     UNIT_CHOICES = (
-        ('week', 'Неделя'),
-        ('month', 'Месяц'),
+        (WEEK_UNIT_CHOICE, 'Неделя'),
+        (MONTH_UNIT_CHOICE, 'Месяц'),
     )
 
     user = models.ForeignKey(User, null=True, blank=True, verbose_name='Пользователь')  # TODO m2m

@@ -20,6 +20,9 @@ RUN cd /usr/local/bin \
 
 # -----------------------------------------------
 
+VOLUME /data/
+VOLUME /conf/
+
 RUN mkdir /opt/attestation
 COPY . /opt/attestation/
 WORKDIR /opt/attestation/
@@ -34,3 +37,10 @@ RUN python3 ./manage.py collectstatic --noinput
 CMD python3 ./manage.py runserver
 
 # -----------------------------------------------
+
+# TODO .dockerignore
+# TODO кнопка ответить блочить
+# TODO travis ci
+# TODO coverall
+# TODO badges
+# TODO docker hub

@@ -1,6 +1,7 @@
 Django==1.9.2
-django-extensions==1.6.1
 gunicorn==19.4.5
 python-dateutil==2.4.2
 six
 ipython
+
+-e git+https://github.com/django-extensions/django-extensions.git@master#egg=django_extensions

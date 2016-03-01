@@ -6,6 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'n&9q=x3e5wdlw2w6+9)9_lz+7@xhr25-&d0dxd2v=hxa!p3o@!'
 
 DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
 AUTH_USER_MODEL = 'core.User'
 
@@ -45,6 +46,7 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
+            'debug': TEMPLATE_DEBUG,
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',

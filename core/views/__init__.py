@@ -109,12 +109,15 @@ class UserExaminationDetailView(DetailView):
     def get_question_log(self):
         if self._question_log_qs is None:
             self._question_log_qs = UserExaminationQuestionLog.objects.filter(user_examination=self.object)
+            for ql_qs in self._question_log_qs:
+                ql_qs.question_data = json.loads(ql_qs.question_data)
         return self._question_log_qs
 
     def get_answer_log_for_question_log(self):
         answer_log_objects = defaultdict(list)
         answer_log_qs = self.get_answer_log_qs()
         for answer_log in answer_log_qs:
+            answer_log.answer_data = json.loads(answer_log.answer_data)
             answer_log_objects[answer_log.user_examination_question_log_id].append(answer_log)
         return answer_log_objects
 
