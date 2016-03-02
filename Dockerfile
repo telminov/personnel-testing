@@ -5,6 +5,12 @@ EXPOSE 8080
 VOLUME /data/
 VOLUME /conf/
 
+RUN apt-get update && \
+    apt-get install -y \
+                    vim \
+                    git \
+                    supervisor
+
 RUN mkdir /opt/personnel-testing
 COPY . /opt/personnel-testing/
 WORKDIR /opt/personnel-testing/
