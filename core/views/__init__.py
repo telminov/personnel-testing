@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from collections import defaultdict
+from core.forms import UserExaminationReportForm
+from core.tables import UserExaminationTable
 from django.contrib import messages
 
 from django.core.urlresolvers import reverse
@@ -10,10 +12,7 @@ from django.shortcuts import redirect
 from django.views.generic import ListView, DetailView, CreateView
 
 from core.models import *
-
-
-def empty():
-    pass
+from django_tables2 import RequestConfig
 
 
 class UserExaminationListView(ListView):
@@ -248,4 +247,20 @@ class UserExaminationReportListView(ListView):
     model = UserExamination
     context_object_name = 'user_examinations'
     template_name = 'core/user_examination_report.html'
+
+    def get_queryset(self):
+        qs = super(UserExaminationReportListView, self).get_queryset()
+        if self.request.GET.get('user'):
+            qs = qs.filter(user=self.request.GET['user'])
+        if self.request.GET.get('examination'):
+            qs = qs.filter(user=self.request.GET['examination'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(UserExaminationReportListView, self).get_context_data(**kwargs)
+        context['form'] = UserExaminationReportForm(self.request.GET or None)
+        table = UserExaminationTable(self.get_queryset())
+        RequestConfig(self.request, paginate=False).configure(table)
+        context['table'] = table
+        return context
 user_examination_report_list_view = UserExaminationReportListView.as_view()

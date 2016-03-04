@@ -19,10 +19,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_extensions',
-
     'auth2',
     'core',
+
+    'bootstrap3',
+    'django_extensions',
+    'django_filters',
+    'django_select2',
+    'django_tables2',
 )
 
 MIDDLEWARE_CLASSES = (

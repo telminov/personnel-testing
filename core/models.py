@@ -167,10 +167,10 @@ class UserExamination(models.Model):
     examination = models.ForeignKey(Examination, related_name='user_examinations', verbose_name='Тестирование')
     user = models.ForeignKey(User, related_name='user_examinations', verbose_name='Пользователь')
 
+    points = models.PositiveSmallIntegerField(default=0, verbose_name='Баллы')
+
     available_from = models.DateTimeField(verbose_name='Тест доступен для прохождения от')
     complete_until = models.DateTimeField(db_index=True, verbose_name='Надо выполнить до')
-
-    points = models.PositiveSmallIntegerField(default=0, verbose_name='Баллы')
 
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='Начат')
     finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
