@@ -20,8 +20,8 @@
             <ul class="nav navbar-nav" style="width: 100%">
                 <li class=""><a href="/">Главная</a></li>
                 {% if user.is_staff %}
-                <li class=""><a href="{% url 'departments_list_view' %}">Отчеты по прохождениям</a></li>
-                <li class=""><a href="{% url 'user_examination_report_list_view' %}">Список аттестаций</a></li>
+                    <li class=""><a href="{% url 'departments_list_view' %}">Отчеты по прохождениям</a></li>
+                    <li class=""><a href="{% url 'user_examination_report_list_view' %}">Список аттестаций</a></li>
                 {% endif %}
                 <li class="dropdown pull-right">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user }} <span class="caret"></span></a>

@@ -239,7 +239,6 @@ class DepartmentUserExaminationsListView(ListView):
 
     def get_queryset(self):
         return self.model.objects.filter(user=self.get_user())
-
 department_user_examinations_list_view = DepartmentUserExaminationsListView.as_view()
 
 

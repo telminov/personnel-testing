@@ -96,6 +96,9 @@ STATIC_URL = '/static/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+SELECT2_JS = 'core/js/select2.full.min.js'
+SELECT2_CSS = 'core/css/select2.min.css'
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
