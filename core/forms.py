@@ -21,3 +21,11 @@ class UserManagementCreateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'departments',  'is_staff')
+
+
+class UserManagementUpdateForm(forms.ModelForm):
+    departments = forms.ModelMultipleChoiceField(label='Отделы', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'departments',  'is_staff')

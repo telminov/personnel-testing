@@ -14,12 +14,20 @@
           method="POST">{% csrf_token %}
         {% for answer in answers %}
             <div class="form-group">
-                <input type="{{ input_type }}" name="answer_id" value="{{ answer.id }}" id="answer{{ answer.id }}">
+                <input type="{{ input_type }}" class="answer-input" name="answer_id" value="{{ answer.id }}" id="answer{{ answer.id }}">
                 <label for="answer{{ answer.id }}">{{ answer.body }}</label>
             </div>
         {% endfor %}
-        <input type="submit" class="btn btn-success" value="Ответить">
+        <input type="submit" disabled="disabled" class="btn btn-success" value="Ответить">
 
     </form>
 
 {% endblock content %}
+
+{% block js %}
+    <script>
+        $('.answer-input').click(function(){
+            $('input[type="submit"]').prop("disabled", false)
+        })
+    </script>
+{% endblock js %}

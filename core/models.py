@@ -42,7 +42,7 @@ class JSONField(models.TextField):
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-    username = models.CharField(max_length=150, verbose_name='Логин пользователя')
+    username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
     is_active = models.BooleanField(default=True)

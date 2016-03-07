@@ -30,7 +30,7 @@
 
         <tr>
             <td>
-                {{ user.username }}
+                <a href="{% url 'user_management_update_view' user.id %}">{{ user.username }}</a>
             </td>
             <td>
                 {{ user.email }}

@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^departments/$', core.views.departments_list_view, name='departments_list_view'),
     url(r'^departments/(?P<department_id>\d+)/$', core.views.department_users_list_view, name='department_users_list_view'),
     url(r'^departments/(?P<department_id>\d+)/(?P<user_id>\d+)/$', core.views.department_user_examinations_list_view, name='department_user_examinations_list_view'),
+    url(r'^users/(?P<user_id>\d+)/$', management.user_management_update_view, name='user_management_update_view'),
     url(r'^users/create/$', management.user_management_create_view, name='user_management_create_view'),
     url(r'^users/$', management.user_management_list_view, name='user_management_list_view'),
 ]
