@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from collections import defaultdict
-from core.forms import UserExaminationReportForm
-from core.tables import UserExaminationTable
-from django.contrib import messages
 
+import datetime
+import json
+
+from collections import defaultdict
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.forms import model_to_dict
 from django.http import Http404
 from django.shortcuts import redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView
 
-from core.models import *
-from django_tables2 import RequestConfig
+from core.models import (
+    UserExamination, UserExaminationQuestionLog, UserExaminationAnswerLog, Department, User, Question,
+    Answer
+)
 
 
 class UserExaminationListView(ListView):
@@ -209,7 +212,6 @@ class DepartmentUsersListView(ListView):
 
     def get_queryset(self):
         return self.model.objects.filter(departments__in=[self.kwargs['department_id']])
-
 department_users_list_view = DepartmentUsersListView.as_view()
 
 
@@ -240,26 +242,3 @@ class DepartmentUserExaminationsListView(ListView):
     def get_queryset(self):
         return self.model.objects.filter(user=self.get_user())
 department_user_examinations_list_view = DepartmentUserExaminationsListView.as_view()
-
-
-class UserExaminationReportListView(ListView):
-    model = UserExamination
-    context_object_name = 'user_examinations'
-    template_name = 'core/user_examination_report.html'
-
-    def get_queryset(self):
-        qs = super(UserExaminationReportListView, self).get_queryset()
-        if self.request.GET.get('user'):
-            qs = qs.filter(user=self.request.GET['user'])
-        if self.request.GET.get('examination'):
-            qs = qs.filter(user=self.request.GET['examination'])
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super(UserExaminationReportListView, self).get_context_data(**kwargs)
-        context['form'] = UserExaminationReportForm(self.request.GET or None)
-        table = UserExaminationTable(self.get_queryset())
-        RequestConfig(self.request, paginate=False).configure(table)
-        context['table'] = table
-        return context
-user_examination_report_list_view = UserExaminationReportListView.as_view()

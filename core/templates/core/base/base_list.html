@@ -1,0 +1,24 @@
+{% extends 'core/base/base.html' %}
+
+{% block content %}
+
+    {% block filter %}
+
+    {% load bootstrap3 %}
+
+    <form action="" method="GET" class="form-horizontal">
+        {% bootstrap_form form layout="horizontal" %}
+        {% block buttons %}
+      {% buttons layout='horizontal' %}
+        <button type="submit" class="btn btn-success">
+          {% bootstrap_icon "search" %} Поиск
+        </button>
+      {% endbuttons %}
+        {% endblock buttons %}
+    </form>
+
+    {% endblock filter %}
+
+    {% block table %}{% endblock table %}
+
+{% endblock content %}

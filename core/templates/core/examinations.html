@@ -3,7 +3,6 @@
 {% block content %}
     {% if user_examinations %}
         <h4>Тестирования доступные для прохождения</h4>
-    {% endif %}
     <table class="table table-striped table-bordered">
     <thead>
     <tr>
@@ -33,7 +32,13 @@
     {% endfor %}
     </tbody>
     </table>
+    {% else %}
+        <h4>Доступных тестирований для прохождения нет</h4>
+    {% endif %}
 
+    <hr/>
+
+    {% if user_examinations_finished %}
     <h4>Пройденные тестирования</h4>
     <table class="table table-striped table-bordered">
     <thead>
@@ -65,5 +70,8 @@
     {% endfor %}
     </tbody>
     </table>
+    {% else %}
+    <h4>Пройденные тестирования отсутствуют</h4>
+    {% endif %}
 
 {% endblock content %}
