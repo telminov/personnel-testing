@@ -8,18 +8,17 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        # Named (optional) arguments
-        parser.add_argument('--deamon',
+        parser.add_argument('-i', '--infinite',
             action='store_true',
-            dest='deamon',
+            dest='infinite',
             default=False,
-            help='Run as deamon'
+            help='Run infinite loop'
         )
 
     def handle(self, *args, **options):
-        if options['deamon']:
+        if options['infinite']:
             while True:
                 Scheduler.check_user_examinations()
-                time.sleep(60 * 30)  # 30 min
+                time.sleep(60)
         else:
             Scheduler.check_user_examinations()
