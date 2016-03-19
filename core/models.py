@@ -169,10 +169,10 @@ class UserExamination(models.Model):
             return True
 
         if self.finished_at is None:
-            return True
+            return False
 
         deadline_dt = self.finished_at + datetime.timedelta(hours=1)  # TODO
-        return datetime.datetime.now() > deadline_dt
+        return datetime.datetime.now() < deadline_dt
 
     def get_status_color(self):
         if self.points >= 70:

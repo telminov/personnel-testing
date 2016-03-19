@@ -134,3 +134,40 @@ class MainTestCase(TestCase):
 
     def test_question_get_next_id_in_examination(self):
         pass
+
+    def test_user_examination_can_view_logs(self):
+        department = Department.objects.create(name='test dep')
+        examination = Examination.objects.create(name='test exam', department=department)
+        user = User.objects.create(username='test', email='admin@admin.com')
+        user2 = User.objects.create(username='test2', email='admin2@admin.com', is_staff=True)
+        department.employees.add(user)
+
+        available_from = datetime.datetime.now() - datetime.timedelta(days=2)
+        complete_until = datetime.datetime.now() - datetime.timedelta(days=1)
+        user_examination = UserExamination.objects.create(
+            examination=examination, user=user,
+            available_from=available_from,
+            complete_until=complete_until,
+            started_at=datetime.datetime.now(),
+        )
+
+        self.assertFalse(user_examination.can_view_logs())
+        self.assertFalse(user_examination.can_view_logs(user))
+        self.assertTrue(user_examination.can_view_logs(user2))
+
+        user_examination.finished_at = datetime.datetime.now()
+        user_examination.save()
+
+        self.assertTrue(user_examination.can_view_logs())
+        self.assertTrue(user_examination.can_view_logs(user))
+        self.assertTrue(user_examination.can_view_logs(user2))
+
+        user_examination.finished_at = datetime.datetime.now() - datetime.timedelta(days=1)
+        user_examination.save()
+
+        self.assertFalse(user_examination.can_view_logs())
+        self.assertFalse(user_examination.can_view_logs(user))
+        self.assertTrue(user_examination.can_view_logs(user2))
+
+
+
