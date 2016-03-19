@@ -3,6 +3,7 @@
 {% block content %}
 
     <h3>Пользователь {{ user_examination.user }}, тестирование {{ user_examination.examination }}</h3>
+        <hr/>
 
     <table class="table table-striped table-bordered">
         <thead>
@@ -42,18 +43,25 @@
 
     </tbody>
     </table>
+        <hr/>
+
+    {% if can_view_logs %}
 
     <h3>Ответы пользователя</h3>
 
     {% for question in question_log %}
         <hr/>
-    <h5>{{ question.question_data.body }}</h5>
+        <h5>{{ question.question_data.body }}</h5>
         {% for answer in answer_log|get_by_key:question.id %}
             {{ answer.answer_data.body }} - <span style="color: {% if answer.answer_data.is_right %}green{% else %}red{% endif %}">{{ answer.answer_data.is_right|yesno:'правильный, не правильный' }}</span>
         {% empty %}
             <p>Ответ отсутствует</p>
         {% endfor %}
-
+        <hr/>
     {% endfor %}
+
+    {% else %}
+        <h3>Просмотр результатов недоступен - истекло время просмотра</h3>
+    {% endif %}
 
 {% endblock content %}

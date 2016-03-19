@@ -4,3 +4,6 @@ th.asc:after {
 th.desc:after {
     content: '\0000a0\0025bc';
 }
+.answer-form label {
+    display: inline;
+}

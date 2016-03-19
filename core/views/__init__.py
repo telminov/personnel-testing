@@ -142,6 +142,7 @@ class UserExaminationDetailView(DetailView):
         context['question_log'] = self.get_question_log()
         context['answer_log'] = self.get_answer_log_for_question_log()
         context['user_examinations_stats'] = self.get_answers_stats()
+        context['can_view_logs'] = self.object.can_view_logs(self.request.user)
         return context
 
 user_examination_detail_view = UserExaminationDetailView.as_view()

@@ -1,47 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 
-import six
 from dateutil.relativedelta import relativedelta
-
-from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
-from django.db.models import SET_NULL, DO_NOTHING, Q
+from django.db import models
+from django.db.models import DO_NOTHING, Q
 
-
-class JSONField(models.TextField):
-    def __init__(self, *args, **kwargs):
-        default = kwargs.get('default', '{}')
-        if isinstance(default, (list, dict)):
-            kwargs['default'] = json.dumps(default)
-        models.TextField.__init__(self, *args, **kwargs)
-
-    def to_python(self, value):
-        """Convert our string value to JSON after we load it from the DB"""
-        if value is None or value == '':
-            return {}
-        return json.loads(value)
-
-    def get_db_prep_save(self, value, connection, **kwargs):
-        """Convert our JSON object to a string before we save"""
-        if value is None and self.null:
-            return None
-        # default values come in as strings; only non-strings should be
-        # run through `dumps`
-        if not isinstance(value, six.string_types):
-            value = json.dumps(value)
-        return value
-
-    def deconstruct(self):
-        name, path, args, kwargs = super(JSONField, self).deconstruct()
-        if self.default == '{}':
-            del kwargs['default']
-        return name, path, args, kwargs
+from core.fields import JSONField
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
     username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
@@ -76,8 +44,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Department(models.Model):
     """ Отдел """
     name = models.CharField(max_length=255, verbose_name='Название')
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='children', verbose_name='Родительский отдел')
-    responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True, verbose_name='Ответственные')
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children',
+                               verbose_name='Родительский отдел')
+    responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True,
+                                         verbose_name='Ответственные')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
 
     def __unicode__(self):
@@ -194,6 +164,16 @@ class UserExamination(models.Model):
         now = datetime.datetime.now()
         UserExamination.objects.filter(finished_at__isnull=True, complete_until__lt=now).update(finished_at=now)
 
+    def can_view_logs(self, user=None):
+        if user and user.is_staff:
+            return True
+
+        if self.finished_at is None:
+            return True
+
+        deadline_dt = self.finished_at + datetime.timedelta(hours=1)  # TODO
+        return datetime.datetime.now() > deadline_dt
+
     def get_status_color(self):
         if self.points >= 70:
             return 'success'
@@ -250,7 +230,8 @@ class UserExaminationQuestionLog(models.Model):
 
 
 class UserExaminationAnswerLog(models.Model):
-    user_examination_question_log = models.ForeignKey(UserExaminationQuestionLog, related_name='user_examination_answer_logs')
+    user_examination_question_log = models.ForeignKey(UserExaminationQuestionLog,
+                                                      related_name='user_examination_answer_logs')
     is_right = models.BooleanField()
 
     answer = models.ForeignKey(Answer, on_delete=DO_NOTHING)
@@ -277,7 +258,7 @@ class Scheduler(models.Model):
     count = models.PositiveSmallIntegerField(verbose_name='Сколько раз повторять')
     period = models.PositiveSmallIntegerField(verbose_name='Как часто повторять')
     unit = models.CharField(max_length=255, choices=UNIT_CHOICES, verbose_name='Единица измерения периода',
-                                            help_text='Раз в 2 месяца, 3 раза в неделю')
+                            help_text='Раз в 2 месяца, 3 раза в неделю')
 
     is_active = models.BooleanField(default=False, verbose_name='В работе')
 
@@ -323,10 +304,10 @@ class Scheduler(models.Model):
 
             for user in scheduler.get_users():
                 if not UserExamination.objects.filter(
-                    user=user, examination=scheduler.examination,
-                    available_from__gte=scheduler_from_dt
+                        user=user, examination=scheduler.examination,
+                        available_from__gte=scheduler_from_dt
                 ).exists():
                     UserExamination.objects.create(
                         examination=scheduler.examination, user=user, available_from=now,
-                        complete_until=now+datetime.timedelta(days=7)  # TODO hard code 7 days
+                        complete_until=now + datetime.timedelta(days=7)  # TODO hard code 7 days
                     )

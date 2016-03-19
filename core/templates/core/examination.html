@@ -10,7 +10,7 @@
     <h4>{{ question.body }}</h4>
     <hr/>
 
-    <form action="{% url 'user_examination_answer_view' user_examination.id question.id %}"
+    <form class="answer-form" action="{% url 'user_examination_answer_view' user_examination.id question.id %}"
           method="POST">{% csrf_token %}
         {% for answer in answers %}
             <div class="form-group">
