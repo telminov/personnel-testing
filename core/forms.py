@@ -29,3 +29,10 @@ class UserManagementUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'departments',  'is_staff')
+
+
+class ApiUserImportForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password')

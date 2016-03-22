@@ -126,6 +126,27 @@ class MainTestCase(TestCase):
 
         self.assertIsNotNone(UserExamination.objects.get(id=user_examination.id).finished_at)
 
+    def test_user_examination_fixed_started_one(self):
+        department = Department.objects.create(name='test dep')
+        examination = Examination.objects.create(name='test exam', department=department)
+        question = Question.objects.create(examination=examination)
+        question1 = Question.objects.create(examination=examination)
+        question2 = Question.objects.create(examination=examination)
+        user = User.objects.create(username='test', email='admin@admin.com')
+        department.employees.add(user)
+
+        available_from = datetime.datetime.now() - datetime.timedelta(days=2)
+        complete_until = datetime.datetime.now() - datetime.timedelta(days=1)
+        user_examination = UserExamination.objects.create(
+            examination=examination, user=user, available_from=available_from, complete_until=complete_until,
+            started_at=available_from, must_finished_at=complete_until
+        )
+
+        UserExamination.fixed_started()
+
+        self.assertIsNotNone(UserExamination.objects.get(id=user_examination.id).finished_at)
+        self.assertEqual(UserExaminationQuestionLog.objects.count(), 3)
+
     def test_question_get_remains_for_user_examination(self):
         pass
 

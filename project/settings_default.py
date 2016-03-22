@@ -86,6 +86,11 @@ USE_L10N = True
 
 USE_TZ = False
 
+AUTHENTICATION_BACKENDS = [
+    'auth2.backends.EmailAuthBackend',
+    'auth2.backends.UsernameAuthBackend',
+]
+
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = '/media/'

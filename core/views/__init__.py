@@ -46,8 +46,22 @@ class UserExaminationQuestionDetailView(DetailView):
 
         user_examination = self.get_object()
         if user_examination.started_at is None:
-            user_examination.started_at = datetime.datetime.now()
+            started_at = datetime.datetime.now()
+            must_finished_at = started_at + datetime.timedelta(minutes=user_examination.examination.minutes_to_pass)
+
+            user_examination.started_at = started_at
+            user_examination.must_finished_at = must_finished_at
             user_examination.save()
+
+        if datetime.datetime.now() > user_examination.must_finished_at:
+            user_examination.finish()
+            for question in user_examination.examination.questions.all():
+                UserExaminationQuestionLog.objects.get_or_create(
+                    user_examination=user_examination, question=question,
+                    defaults={'question_data': model_to_dict(question)}
+                )
+            messages.success(self.request, 'Тестирование %s завершено. Закончилось время.' % user_examination.examination.name)
+            return redirect(reverse('user_examination_list_view'))
 
         question_id = self.kwargs.get('question_id')
 
@@ -59,17 +73,15 @@ class UserExaminationQuestionDetailView(DetailView):
             )
 
             if self.user_examination_question_log.user_examination_answer_logs.exists():
-                raise Http404
+                return redirect(reverse(user_examination_question_detail_view, args=[user_examination.id]))
 
             return super(UserExaminationQuestionDetailView, self).dispatch(request, *args, **kwargs)
         else:
             next_question_id = Question.get_next_id_in_examination(user_examination)
 
             if next_question_id is None:
-                user_examination.finished_at = datetime.datetime.now()
-                user_examination.calculate_points(commit=False)
-                user_examination.save()
-                messages.success(request, 'Тестирование %s завершено' % user_examination.examination.name)
+                user_examination.finish()
+                messages.success(self.request, 'Тестирование %s завершено.' % user_examination.examination.name)
                 return redirect(reverse('user_examination_list_view'))
             else:
                 return redirect(reverse(user_examination_question_detail_view, args=[user_examination.id, next_question_id]))

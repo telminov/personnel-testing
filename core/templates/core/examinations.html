@@ -10,6 +10,7 @@
         <th>Создано</th>
         <th>Выполнить до</th>
         <th>Начало выполнения</th>
+        <th>Минут до закрытия</th>
     </tr>
     </thead>
     <tbody>
@@ -26,6 +27,9 @@
             </td>
             <td>
                 {{ user_examination.started_at|default:'Не начато' }}
+            </td>
+            <td>
+                {{ user_examination.remaining_minutes|default_if_none:'Не начато' }}
             </td>
         </tr>
 

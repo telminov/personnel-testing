@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
+import string
 
+import random
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.db import models
 from django.db.models import DO_NOTHING, Q
 
 from core.fields import JSONField
+from django.forms import model_to_dict
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -30,6 +33,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'пользователя'
         verbose_name_plural = 'Пользователи'
+
+    def set_random_password(self, commit=True):
+        password = ''.join([random.choice(string.digits) for i in range(0, 10)])
+        self.set_password(password)
+        if commit:
+            self.save()
+        return password
 
     def get_full_name(self):
         return self.username
@@ -63,6 +73,7 @@ class Department(models.Model):
 
 class Examination(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
+    minutes_to_pass = models.PositiveSmallIntegerField(default=30, verbose_name='Сколько минут дано на тест')
     department = models.ForeignKey(Department, related_name='examinations', verbose_name='Отдел')
 
     def __unicode__(self):
@@ -143,6 +154,7 @@ class UserExamination(models.Model):
     complete_until = models.DateTimeField(db_index=True, verbose_name='Надо выполнить до')
 
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='Начат')
+    must_finished_at = models.DateTimeField(null=True, blank=True, verbose_name='Обязан закончить до')
     finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
 
     class Meta:
@@ -164,6 +176,32 @@ class UserExamination(models.Model):
         now = datetime.datetime.now()
         UserExamination.objects.filter(finished_at__isnull=True, complete_until__lt=now).update(finished_at=now)
 
+    @classmethod
+    def fixed_started(cls):
+        for user_examination_id in UserExamination.objects.filter(finished_at__isnull=True).values_list('id', flat=True):
+            cls.fixed_started_one(user_examination_id)
+
+    @classmethod
+    def fixed_started_one(cls, user_examination_id):
+        user_examination = cls.objects.get(id=user_examination_id, finished_at__isnull=True)
+        if datetime.datetime.now() > user_examination.must_finished_at:
+            user_examination.finish()
+            for question in user_examination.examination.questions.all():
+                UserExaminationQuestionLog.objects.get_or_create(
+                    user_examination=user_examination, question=question,
+                    defaults={'question_data': model_to_dict(question)}
+                )
+
+    @property
+    def remaining_minutes(self):
+        if self.started_at is None:
+            return None
+        minutes = (self.must_finished_at - datetime.datetime.now()).total_seconds() / 60
+
+        if minutes < 0:
+            return 0
+        return minutes
+
     def can_view_logs(self, user=None):
         if user and user.is_staff:
             return True
@@ -173,6 +211,15 @@ class UserExamination(models.Model):
 
         deadline_dt = self.finished_at + datetime.timedelta(hours=1)  # TODO
         return datetime.datetime.now() < deadline_dt
+
+    def finish(self, force=False):
+        if not force:
+            assert self.finished_at is None
+            assert self.points == 0
+
+        self.finished_at = datetime.datetime.now()
+        self.calculate_points(commit=False)
+        self.save()
 
     def get_status_color(self):
         if self.points >= 70:
