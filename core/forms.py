@@ -32,7 +32,15 @@ class UserManagementUpdateForm(forms.ModelForm):
 
 
 class ApiUserImportForm(forms.ModelForm):
+    department = forms.ModelChoiceField(queryset=Department.objects.all())
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
+
+
+class ApiDepartmentImportForm(forms.ModelForm):
+
+    class Meta:
+        model = Department
+        fields = ('name',)
