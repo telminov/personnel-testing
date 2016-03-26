@@ -14,15 +14,15 @@ from django.forms import model_to_dict
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True)
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
 
     def __unicode__(self):
         return self.get_full_name()
