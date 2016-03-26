@@ -1,7 +1,18 @@
 {% extends 'core/base/base_list.html' %}
 
-{% block filter %}
-{% endblock filter %}
+
+
+    {% block buttons %}
+    {% load bootstrap3 %}
+      {% buttons layout='horizontal' %}
+        <button type="submit" class="btn btn-success">
+          {% bootstrap_icon "search" %} Поиск
+        </button>
+        <a href="{% url 'scheduler_create_view' %}" type="submit" class="btn btn-info pull-right">
+          {% bootstrap_icon "plus" %} Добавить
+        </a>
+      {% endbuttons %}
+        {% endblock buttons %}
 
 {% block table %}
     <table class="table table-striped table-bordered">
@@ -10,6 +21,7 @@
                 <th>Тестирование</th>
                 <th>Как часто</th>
                 <th>Активность</th>
+                <th>Действия</th>
             </tr>
         </thead>
     <tbody>
@@ -18,13 +30,16 @@
 
         <tr>
             <td>
-                <a href="{% url 'scheduler_update_view' scheduler.id %}">{{ scheduler.examination }}</a>
+                {{ scheduler.examination }}
             </td>
             <td>
                 {{ scheduler.get_verbose_period }}
             </td>
             <td>
                 {{ scheduler.is_active|yesno:'Активно, Не активно' }}
+            </td>
+            <td>
+                <a href="{% url 'scheduler_update_view' scheduler.id %}"><i class="glyphicon glyphicon-eye-open"></i></a>
             </td>
         </tr>
 

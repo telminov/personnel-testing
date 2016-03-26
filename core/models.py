@@ -324,7 +324,21 @@ class Scheduler(models.Model):
             verb = '{count} раз в {period} {unit}'
         else:
             verb = '{count} раз в {unit}'
-        return verb.format(unit=self.UNIT_VERBOSE_CHOICES[self.unit], count=self.count, period=self.period)
+
+        try:
+            if self.period % 100 in (11, 12, 13, 14):
+                unit = 'недель'
+            elif self.period % 10 == 1:
+                unit = 'неделю'
+            elif self.period % 10 in (2, 3, 4):
+                unit = 'недели'
+            else:
+                unit = 'недель'
+        except:
+            raise AttributeError
+
+
+        return verb.format(unit=unit, count=self.count, period=self.period)
 
     def get_timedelta(self):
         if self.unit == 'month':

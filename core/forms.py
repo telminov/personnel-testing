@@ -25,11 +25,17 @@ class UserCreateForm(forms.ModelForm):
 
 class SchedulerCreateForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(label='Пользователи', required=False, queryset=User.objects.all(), widget=Select2MultipleWidget)
-    departments = forms.ModelMultipleChoiceField(label='Пользователи', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
+    departments = forms.ModelMultipleChoiceField(label='Отделы', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
 
     class Meta:
         model = Scheduler
         fields = ('users', 'departments', 'examination', 'count', 'period', 'unit', 'is_active')
+
+
+class SchedulerSearchForm(forms.Form):
+    users = forms.ModelMultipleChoiceField(label='Пользователи', queryset=User.objects.all(), required=False, widget=Select2MultipleWidget)
+    departments = forms.ModelMultipleChoiceField(label='Отделы', queryset=Department.objects.all(), required=False, widget=Select2MultipleWidget)
+    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
 
 
 class UserUpdateForm(forms.ModelForm):
