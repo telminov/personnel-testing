@@ -1,0 +1,43 @@
+{% extends 'core/base/base.html' %}
+
+{% block content %}
+    <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Пользователь</th>
+            <th>Следующая аттестация</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in scheduler.get_users %}
+        <tr>
+            <td>{{ user }}</td>
+            <td>{{ user_next_examinations|get_by_key:user.id }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+     <h3>История создания через планировщик</h3>
+
+    <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Тестирование</th>
+            <th>Доступна от</th>
+            <th>Начата</th>
+            <th>Пройдена</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user_examination in user_examinations|get_by_key:user.id %}
+        <tr>
+            <td><a href="{% url 'user_examination_detail_view' user_examination.id %}">{{ user_examination.examination }}</a></td>
+            <td>{{ user_examination.available_from }}</td>
+            <td>{{ user_examination.started_at }}</td>
+            <td>{{ user_examination.finished_at }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+{% endblock content %}

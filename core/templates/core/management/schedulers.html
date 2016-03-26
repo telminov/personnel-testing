@@ -1,18 +1,16 @@
 {% extends 'core/base/base_list.html' %}
 
-
-
-    {% block buttons %}
+{% block buttons %}
     {% load bootstrap3 %}
-      {% buttons layout='horizontal' %}
+    {% buttons layout='horizontal' %}
         <button type="submit" class="btn btn-success">
-          {% bootstrap_icon "search" %} Поиск
+            {% bootstrap_icon "search" %} Поиск
         </button>
         <a href="{% url 'scheduler_create_view' %}" type="submit" class="btn btn-info pull-right">
-          {% bootstrap_icon "plus" %} Добавить
+            {% bootstrap_icon "plus" %} Добавить
         </a>
-      {% endbuttons %}
-        {% endblock buttons %}
+    {% endbuttons %}
+{% endblock buttons %}
 
 {% block table %}
     <table class="table table-striped table-bordered">
@@ -24,27 +22,29 @@
                 <th>Действия</th>
             </tr>
         </thead>
-    <tbody>
+        <tbody>
 
-    {% for scheduler in schedulers %}
+        {% for scheduler in schedulers %}
 
-        <tr>
-            <td>
-                {{ scheduler.examination }}
-            </td>
-            <td>
-                {{ scheduler.get_verbose_period }}
-            </td>
-            <td>
-                {{ scheduler.is_active|yesno:'Активно, Не активно' }}
-            </td>
-            <td>
-                <a href="{% url 'scheduler_update_view' scheduler.id %}"><i class="glyphicon glyphicon-eye-open"></i></a>
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    {{ scheduler.examination }}
+                </td>
+                <td>
+                    {{ scheduler.get_verbose_period }}
+                </td>
+                <td>
+                    {{ scheduler.is_active|yesno:'Активно, Не активно' }}
+                </td>
+                <td>
+                    <a href="{% url 'scheduler_update_view' scheduler.id %}">Редактировать</a>
+                    <br/>
+                    <a href="{% url 'scheduler_detail_view' scheduler.id %}">Статистика</a>
+                </td>
+            </tr>
 
-    {% endfor %}
-    </tbody>
+        {% endfor %}
+        </tbody>
     </table>
 
 {% endblock table %}

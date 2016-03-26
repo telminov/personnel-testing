@@ -21,7 +21,12 @@ urlpatterns = [
     url(r'^users/create/$', user.user_create_or_update_view, name='user_create_view'),
     url(r'^users/$', user.user_list_view, name='user_list_view'),
 
+    url(r'^scheduler/(?P<scheduler_id>\d+)/detail/$', scheduler.scheduler_detail_view, name='scheduler_detail_view'),
     url(r'^scheduler/(?P<scheduler_id>\d+)/$', scheduler.scheduler_create_or_update_view, name='scheduler_update_view'),
     url(r'^scheduler/create/$', scheduler.scheduler_create_or_update_view, name='scheduler_create_view'),
     url(r'^scheduler/$', scheduler.scheduler_list_view, name='scheduler_list_view'),
+
+    url(r'^examination/(?P<examination_id>\d+)/$', examinations.examination_create_or_update_view, name='examination_update_view'),
+    url(r'^examination/create/$', examinations.examination_create_or_update_view, name='examination_create_view'),
+    url(r'^examination/$', examinations.examination_list_view, name='examination_list_view'),
 ]

@@ -1,17 +1,25 @@
 {% extends 'core/base/base.html' %}
 
 {% block content %}
+
+    {% block pre_form %}
+    {% endblock pre_form %}
+
     {% load bootstrap3 %}
 
     <form action="" method="post" class="form-horizontal">
-    {% csrf_token %}
+        {% csrf_token %}
         {% bootstrap_form form layout="horizontal" %}
         {% block buttons %}
-      {% buttons layout='horizontal' %}
-        <button type="submit" class="btn btn-success">
-          {% bootstrap_icon "floppy-save" %} Сохранить
-        </button>
-      {% endbuttons %}
+            {% buttons layout='horizontal' %}
+                <button type="submit" class="btn btn-success">
+                    {% bootstrap_icon "floppy-save" %} Сохранить
+                </button>
+            {% endbuttons %}
         {% endblock buttons %}
+
     </form>
+
+    {% block post_form %}
+    {% endblock post_form %}
 {% endblock content %}

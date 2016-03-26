@@ -153,9 +153,13 @@ class UserExamination(models.Model):
     available_from = models.DateTimeField(verbose_name='Тест доступен для прохождения от')
     complete_until = models.DateTimeField(db_index=True, verbose_name='Надо выполнить до')
 
+    scheduler = models.ForeignKey('Scheduler', null=True, blank=True, on_delete=DO_NOTHING, related_name='user_examinaions')
+
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='Начат')
     must_finished_at = models.DateTimeField(null=True, blank=True, verbose_name='Обязан закончить до')
     finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'тестирование пользователя'
@@ -166,6 +170,10 @@ class UserExamination(models.Model):
 
     def __str__(self):
         return '#%s' % self.id
+
+    def get_next(self, sheduler):
+        return sheduler.get_datetime_for_check_period(self.available_from, for_future=True)
+
 
     @classmethod
     def get_for_user(cls, user, qs=None):
@@ -196,7 +204,7 @@ class UserExamination(models.Model):
     def remaining_minutes(self):
         if self.started_at is None:
             return None
-        minutes = (self.must_finished_at - datetime.datetime.now()).total_seconds() / 60
+        minutes = int((self.must_finished_at - datetime.datetime.now()).total_seconds() / 60)
 
         if minutes < 0:
             return 0
@@ -271,9 +279,9 @@ class UserExaminationQuestionLog(models.Model):
     started_at = models.DateTimeField(auto_now=True)
     finished_at = models.DateTimeField(null=True)
 
-    # class Meta:
-    #     verbose_name = 'ответ пользователя'
-    #     verbose_name_plural = 'Ответы пользователей'
+    class Meta:
+        verbose_name = 'Лог ответов'
+        verbose_name_plural = 'Лог ответов'
 
 
 class UserExaminationAnswerLog(models.Model):
@@ -284,9 +292,9 @@ class UserExaminationAnswerLog(models.Model):
     answer = models.ForeignKey(Answer, on_delete=DO_NOTHING)
     answer_data = JSONField()
 
-    # class Meta:
-    #     verbose_name = 'ответ пользователя(конкретно)'
-    #     verbose_name_plural = 'Ответы пользователей(конкретно)'
+    class Meta:
+        verbose_name = 'Лог ответов на вопросы'
+        verbose_name_plural = 'Лог ответов на вопросы'
 
 
 class Scheduler(models.Model):
@@ -327,16 +335,15 @@ class Scheduler(models.Model):
 
         try:
             if self.period % 100 in (11, 12, 13, 14):
-                unit = 'недель'
+                unit = 'недель' if self.unit == self.WEEK_UNIT_CHOICE else 'месяцев'
             elif self.period % 10 == 1:
-                unit = 'неделю'
+                unit = 'неделю' if self.unit == self.WEEK_UNIT_CHOICE else 'месяц'
             elif self.period % 10 in (2, 3, 4):
-                unit = 'недели'
+                unit = 'недели' if self.unit == self.WEEK_UNIT_CHOICE else 'месяца'
             else:
-                unit = 'недель'
+                unit = 'недель' if self.unit == self.WEEK_UNIT_CHOICE else 'месяцев'
         except:
             raise AttributeError
-
 
         return verb.format(unit=unit, count=self.count, period=self.period)
 
@@ -350,9 +357,12 @@ class Scheduler(models.Model):
 
         return timedelta
 
-    def get_datetime_for_check_period(self, from_dt=None):
+    def get_datetime_for_check_period(self, from_dt=None, for_future=False):
         end_period = from_dt or datetime.datetime.now()
-        start_period = end_period - self.get_timedelta()
+        if for_future:
+            start_period = end_period + self.get_timedelta()
+        else:
+            start_period = end_period - self.get_timedelta()
 
         period_seconds = (start_period - end_period).total_seconds()
 
@@ -361,15 +371,16 @@ class Scheduler(models.Model):
         )
 
     def get_users(self):
-        users = []
+        users = {}
 
         for department in self.departments.all():
-            users.extend(list(department.employees.all()))
+            for user in department.employees.all():
+                users[user.id] = user
 
         for user in self.users.all():
-            users.append(user)
+            users[user.id] = user
 
-        return users
+        return users.values()
 
     @classmethod
     def check_user_examinations(cls):
@@ -386,5 +397,6 @@ class Scheduler(models.Model):
                 ).exists():
                     UserExamination.objects.create(
                         examination=scheduler.examination, user=user, available_from=now,
-                        complete_until=now + datetime.timedelta(days=7)  # TODO hard code 7 days
+                        complete_until=now + datetime.timedelta(days=7), scheduler=scheduler
+                        # TODO hard code 7 days
                     )
