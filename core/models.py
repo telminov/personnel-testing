@@ -200,8 +200,7 @@ class UserExamination(models.Model):
                     defaults={'question_data': model_to_dict(question)}
                 )
 
-    @property
-    def remaining_minutes(self):
+    def get_remaining_minutes(self):
         if self.started_at is None:
             return None
         minutes = int((self.must_finished_at - datetime.datetime.now()).total_seconds() / 60)

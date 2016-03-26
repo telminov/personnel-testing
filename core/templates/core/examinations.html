@@ -29,7 +29,7 @@
                 {{ user_examination.started_at|default:'Не начато' }}
             </td>
             <td>
-                {{ user_examination.remaining_minutes|default_if_none:'Не начато' }}
+                {{ user_examination.get_remaining_minutes|default_if_none:'Не начато' }}
             </td>
         </tr>
 
