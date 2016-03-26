@@ -37,7 +37,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
 
 class UserExaminationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'examination', )
+    list_display = ('id', 'user', 'examination', 'scheduler')
 
 
 class UserExaminationAnswerAdmin(admin.ModelAdmin):

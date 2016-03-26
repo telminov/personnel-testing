@@ -327,6 +327,9 @@ class Scheduler(models.Model):
         verbose_name = 'расписание'
         verbose_name_plural = 'Расписания'
 
+    def __str__(self):
+        return str(self.id)
+
     def get_verbose_period(self):
         if self.period != 1:
             verb = '{count} раз в {period} {unit}'
