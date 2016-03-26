@@ -53,7 +53,7 @@ class UserExaminationAnswerLogAdmin(admin.ModelAdmin):
 
 
 class SchedulerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'department', 'examination', 'count', 'period', 'unit')
+    list_display = ('examination', 'count', 'period', 'unit')
 
 
 admin.site.register(User, UserAdmin)

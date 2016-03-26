@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 class LoginRequiredMiddleware(object):
 
     def process_request(self, request):
-        except_urls = ('/login/',)
+        except_urls = ('/login/', '/api/')
         request_path_startswith = request.path.startswith(except_urls)
         is_authenticated = request.user.is_authenticated()
         redirect_to_login = redirect('/login/?next=%s' % request.get_full_path())

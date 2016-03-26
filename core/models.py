@@ -298,8 +298,14 @@ class Scheduler(models.Model):
         (MONTH_UNIT_CHOICE, 'Месяц'),
     )
 
-    user = models.ForeignKey(User, null=True, blank=True, verbose_name='Пользователь')  # TODO m2m
-    department = models.ForeignKey(Department, null=True, blank=True, verbose_name='Отдел')  # TODO m2m
+    UNIT_VERBOSE_CHOICES = {
+        WEEK_UNIT_CHOICE: 'неделю',
+        MONTH_UNIT_CHOICE: 'месяц'
+    }
+
+    users = models.ManyToManyField(User, related_name='schedulers', blank=True, verbose_name='Пользователь')
+    departments = models.ManyToManyField(Department, related_name='schedulers', blank=True, verbose_name='Отдел')
+
     examination = models.ForeignKey(Examination, related_name='schedulers', verbose_name='Тестирование')
 
     count = models.PositiveSmallIntegerField(verbose_name='Сколько раз повторять')
@@ -312,6 +318,13 @@ class Scheduler(models.Model):
     class Meta:
         verbose_name = 'расписание'
         verbose_name_plural = 'Расписания'
+
+    def get_verbose_period(self):
+        if self.period != 1:
+            verb = '{count} раз в {period} {unit}'
+        else:
+            verb = '{count} раз в {unit}'
+        return verb.format(unit=self.UNIT_VERBOSE_CHOICES[self.unit], count=self.count, period=self.period)
 
     def get_timedelta(self):
         if self.unit == 'month':
@@ -335,10 +348,13 @@ class Scheduler(models.Model):
 
     def get_users(self):
         users = []
-        if self.department:
-            users.extend(list(self.department.employees.all()))
-        if self.user:
-            users.append(self.user)
+
+        for department in self.departments.all():
+            users.extend(list(department.employees.all()))
+
+        for user in self.users.all():
+            users.append(user)
+
         return users
 
     @classmethod

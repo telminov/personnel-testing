@@ -2,7 +2,7 @@ from django import forms
 
 from django_select2.forms import Select2Widget, Select2MultipleWidget
 
-from core.models import User, Examination, Department
+from core.models import User, Examination, Department, Scheduler
 
 
 class UserExaminationReportForm(forms.Form):
@@ -10,11 +10,11 @@ class UserExaminationReportForm(forms.Form):
     examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
 
 
-class UserManagementSearchForm(forms.Form):
+class UserSearchForm(forms.Form):
     department = forms.ModelChoiceField(label='Отдел', required=False, queryset=Department.objects.all(), widget=Select2Widget)
 
 
-class UserManagementCreateForm(forms.ModelForm):
+class UserCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label='Пароль')
     departments = forms.ModelMultipleChoiceField(label='Отделы', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
 
@@ -23,7 +23,16 @@ class UserManagementCreateForm(forms.ModelForm):
         fields = ('username', 'email', 'password', 'departments',  'is_staff')
 
 
-class UserManagementUpdateForm(forms.ModelForm):
+class SchedulerCreateForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(label='Пользователи', required=False, queryset=User.objects.all(), widget=Select2MultipleWidget)
+    departments = forms.ModelMultipleChoiceField(label='Пользователи', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
+
+    class Meta:
+        model = Scheduler
+        fields = ('users', 'departments', 'examination', 'count', 'period', 'unit', 'is_active')
+
+
+class UserUpdateForm(forms.ModelForm):
     departments = forms.ModelMultipleChoiceField(label='Отделы', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
 
     class Meta:
@@ -36,7 +45,7 @@ class ApiUserImportForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password')
+        fields = ('username', 'email')
 
 
 class ApiDepartmentImportForm(forms.ModelForm):

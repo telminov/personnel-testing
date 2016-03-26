@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 
 from core.models import Department, Examination, Scheduler, User, UserExamination, Question, Answer, UserExaminationQuestionLog, UserExaminationAnswerLog
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 
@@ -37,9 +39,10 @@ class MainTestCase(TestCase):
         self.assertEqual(UserExamination.get_for_user(user).count(), 0)
 
         scheduler = Scheduler.objects.create(
-            department=department, examination=examination, count=1, period=1,
+            examination=examination, count=1, period=1,
             unit=Scheduler.WEEK_UNIT_CHOICE, is_active=True
         )
+        scheduler.departments.add(department)
 
         scheduler.check_user_examinations()
 
@@ -190,5 +193,45 @@ class MainTestCase(TestCase):
         self.assertFalse(user_examination.can_view_logs(user))
         self.assertTrue(user_examination.can_view_logs(user2))
 
+    def test_department_import(self):
+        url_path = reverse('department_import')
+        response = self.client.get(url_path)
+        self.assertEqual(response.status_code, 422)
+        response_error = json.loads(str(response.content, encoding='utf8'))
+        self.assertEqual(response_error['errors'], "Empty POST")
 
+        response = self.client.post(url_path)
+        self.assertEqual(response.status_code, 422)
 
+        name = "Vasa"
+        response = self.client.post(url_path, data={'name': name})
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(str(response.content, encoding='utf8'))
+        self.assertEqual(response_data['name'], name)
+        self.assertEqual(response_data['id'], 1)
+
+        self.assertTrue(Department.objects.filter(name=response_data['name']).exists())
+
+    def test_user_import(self):
+        url_path = reverse('user_import')
+        response = self.client.get(url_path)
+
+        self.assertEqual(response.status_code, 422)
+        response_data = json.loads(str(response.content, encoding='utf8'))
+        self.assertEqual(response_data['errors'], "Empty POST")
+
+        response = self.client.post(url_path)
+        self.assertEqual(response.status_code, 422)
+
+        new_department = Department.objects.create(name='new_department')
+        response = self.client.post(url_path, {
+            'department': new_department.id,
+            'username': 'Petya',
+            'email': 'Petya@koze.ru',
+        })
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(str(response.content, encoding='utf8'))
+        new_user = User.objects.get(username='Petya')
+        self.assertEqual(response_data['username'], new_user.username)
+        self.assertEqual(response_data['email'], new_user.email)
+        self.assertTrue(new_user.check_password(response_data['password']))

@@ -7,7 +7,7 @@
         <button type="submit" class="btn btn-success">
           {% bootstrap_icon "search" %} Поиск
         </button>
-        <a href="{% url 'user_management_create_view' %}" type="submit" class="btn btn-info pull-right">
+        <a href="{% url 'user_create_view' %}" type="submit" class="btn btn-info pull-right">
           {% bootstrap_icon "plus" %} Добавить
         </a>
       {% endbuttons %}
@@ -30,7 +30,7 @@
 
         <tr>
             <td>
-                <a href="{% url 'user_management_update_view' user.id %}">{{ user.username }}</a>
+                <a href="{% url 'user_update_view' user.id %}">{{ user.username }}</a>
             </td>
             <td>
                 {{ user.email }}
