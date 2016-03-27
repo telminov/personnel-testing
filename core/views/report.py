@@ -3,13 +3,14 @@ from __future__ import unicode_literals
 
 from core.forms import UserExaminationReportForm
 from core.models import UserExamination
-from django.views.generic import ListView
+from core.views.base import ListView
 
 
 class UserExaminationReportListView(ListView):
     model = UserExamination
     context_object_name = 'user_examinations'
     template_name = 'core/report/user_examinations.html'
+    title = 'Полный список аттестаций пользователей'
 
     def get_queryset(self):
         qs = super(UserExaminationReportListView, self).get_queryset()

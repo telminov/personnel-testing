@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 
 from core.forms import UserCreateForm, UserSearchForm, UserUpdateForm
 from core.models import User
-from core.views.base import CreateOrUpdateView
+from core.views.base import CreateOrUpdateView, ListView
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
 
 
 class UserListView(ListView):
     model = User
     context_object_name = 'users'
     template_name = 'core/management/users.html'
+    title = 'Управление пользователями'
 
     def get_queryset(self):
         qs = super(UserListView, self).get_queryset()
@@ -50,4 +50,12 @@ class UserCreateOrUpdateView(CreateOrUpdateView):
         for department in form.cleaned_data.get('departments', []):
             self.object.departments.add(department)
         return redirect
+
+    def get_title(self):
+        if self.is_create():
+            return 'Создание пользователя'
+        else:
+            user = self.get_object()
+            return 'Редактирование пользователя %s (%s)' % (user.username, user.email or 'email отсутствует')
+
 user_create_or_update_view = UserCreateOrUpdateView.as_view()

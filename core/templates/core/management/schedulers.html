@@ -16,6 +16,7 @@
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Тестирование</th>
                 <th>Как часто</th>
                 <th>Активность</th>
@@ -27,6 +28,9 @@
         {% for scheduler in schedulers %}
 
             <tr>
+                <td>
+                    {{ scheduler.id }}
+                </td>
                 <td>
                     {{ scheduler.examination }}
                 </td>

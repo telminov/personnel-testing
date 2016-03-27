@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 
 from core.forms import ExaminationEditForm, ExaminationSearchForm
 from core.models import Examination
-from core.views.base import CreateOrUpdateView
+from core.views.base import CreateOrUpdateView, ListView
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
 
 
 class ExaminationListView(ListView):
     model = Examination
     context_object_name = 'examinations'
     template_name = 'core/management/examinations.html'
+    title = 'Управление аттестациями'
 
     def get_queryset(self):
         qs = super(ExaminationListView, self).get_queryset()

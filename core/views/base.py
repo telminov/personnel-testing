@@ -1,8 +1,20 @@
 from django.shortcuts import redirect
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, ListView as DjangoListView, DetailView as DjangoDetailView
 
 
-class CreateOrUpdateView(UpdateView):
+class TitleMixin(object):
+    title = None
+
+    def get_title(self):
+        return self.title
+
+    def get_context_data(self, **kwargs):
+        context = super(TitleMixin, self).get_context_data(**kwargs)
+        context['title'] = self.get_title()
+        return context
+
+
+class CreateOrUpdateView(TitleMixin, UpdateView):
     http_method_names = ['get', 'post']
     form_class_create = None
     form_class_update = None
@@ -46,3 +58,11 @@ class CreateOrUpdateView(UpdateView):
             else:
                 self._object = self.model()
         return self._object
+
+
+class ListView(TitleMixin, DjangoListView):
+    pass
+
+
+class DetailView(TitleMixin, DjangoDetailView):
+    pass

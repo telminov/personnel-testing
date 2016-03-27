@@ -171,10 +171,6 @@ class UserExamination(models.Model):
     def __str__(self):
         return '#%s' % self.id
 
-    def get_next(self, sheduler):
-        return sheduler.get_datetime_for_check_period(self.available_from, for_future=True)
-
-
     @classmethod
     def get_for_user(cls, user, qs=None):
         return cls.objects.filter(user=user)
@@ -317,8 +313,9 @@ class Scheduler(models.Model):
 
     count = models.PositiveSmallIntegerField(verbose_name='Сколько раз повторять')
     period = models.PositiveSmallIntegerField(verbose_name='Как часто повторять')
-    unit = models.CharField(max_length=255, choices=UNIT_CHOICES, verbose_name='Единица измерения периода',
-                            help_text='Раз в 2 месяца, 3 раза в неделю')
+    unit = models.CharField(max_length=255, choices=UNIT_CHOICES, default=WEEK_UNIT_CHOICE,
+                            verbose_name='Единица измерения периода',
+                            help_text='Например: 1 раз в 2 месяца, 3 раза в 1 неделю')
 
     is_active = models.BooleanField(default=False, verbose_name='В работе')
 
@@ -358,6 +355,9 @@ class Scheduler(models.Model):
             raise AttributeError
 
         return timedelta
+
+    def get_next(self, from_dt=None):
+        return self.get_datetime_for_check_period(from_dt, for_future=True)
 
     def get_datetime_for_check_period(self, from_dt=None, for_future=False):
         end_period = from_dt or datetime.datetime.now()

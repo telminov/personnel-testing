@@ -8,9 +8,8 @@ from collections import defaultdict
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.forms import model_to_dict
-from django.http import Http404
 from django.shortcuts import redirect
-from django.views.generic import ListView, DetailView
+from core.views.base import ListView, DetailView
 
 from core.models import (
     UserExamination, UserExaminationQuestionLog, UserExaminationAnswerLog, Department, User, Question,
@@ -22,6 +21,7 @@ class UserExaminationListView(ListView):
     model = UserExamination
     template_name = 'core/examinations.html'
     context_object_name = 'user_examinations'
+    title = 'Список персональных аттестаций'
 
     def get_queryset(self):
         return self.model.get_for_user(self.request.user.id).filter(finished_at__isnull=True)
@@ -41,6 +41,13 @@ class UserExaminationQuestionDetailView(DetailView):
     template_name = 'core/examination.html'
     question = None
     user_examination_question_log = None
+
+    def get_title(self):
+        user_examination = self.get_object()
+        return 'Тестирование %s, необходимо закончить до %s, осталось %s мин.' % (
+            user_examination.examination, user_examination.must_finished_at.strftime('%d.%m.%Y %H:%M:%S'),
+            user_examination.get_remaining_minutes(),
+        )
 
     def dispatch(self, request, *args, **kwargs):
 
@@ -149,6 +156,10 @@ class UserExaminationDetailView(DetailView):
 
         return stats
 
+    def get_title(self):
+        user_examination = self.get_object()
+        return 'Пользователь %s, тестирование %s' % (user_examination.user, user_examination.examination)
+
     def get_context_data(self, **kwargs):
         context = super(UserExaminationDetailView, self).get_context_data(**kwargs)
         context['question_log'] = self.get_question_log()
@@ -207,6 +218,7 @@ class DepartmentsListView(ListView):
     model = Department
     template_name = 'core/departments.html'
     context_object_name = 'departments'
+    title = 'Выбор отдела для детальной статистики'
 
     def get_queryset(self):
         return self.request.user.departments_owner.all()
@@ -217,10 +229,19 @@ class DepartmentUsersListView(ListView):
     model = User
     context_object_name = 'users'
     template_name = 'core/department_users.html'
+    _department = None
+
+    def get_department(self):
+        if not self._department:
+            self._department = self.request.user.departments_owner.get(id=self.kwargs['department_id'])
+        return self._department
+
+    def get_title(self):
+        return 'Выбор пользователя отдела «%s» для детальной статистики' % self.get_department()
 
     def get_context_data(self, **kwargs):
         context = super(DepartmentUsersListView, self).get_context_data(**kwargs)
-        context['department'] = self.request.user.departments_owner.get(id=self.kwargs['department_id'])
+        context['department'] = self.get_department()
         return context
 
     def get_queryset(self):
@@ -246,12 +267,15 @@ class DepartmentUserExaminationsListView(ListView):
             self._user = department.employees.get(id=self.kwargs['user_id'])
         return self._user
 
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.get_user())
+
     def get_context_data(self, **kwargs):
         context = super(DepartmentUserExaminationsListView, self).get_context_data(**kwargs)
         context['department'] = self.get_department()
         context['user'] = self.get_user()
         return context
 
-    def get_queryset(self):
-        return self.model.objects.filter(user=self.get_user())
+    def get_title(self):
+        return 'Отдел %s, пользователь %s' % (self.get_department(), self.get_user())
 department_user_examinations_list_view = DepartmentUserExaminationsListView.as_view()
