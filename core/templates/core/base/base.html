@@ -20,7 +20,7 @@
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav" style="width: 100%">
                 <li class=""><a href="/">Главная</a></li>
-                {% if user.is_staff %}
+                {% if request.user.is_staff %}
                     <li class=""><a href="{% url 'departments_list_view' %}">Отчеты по прохождениям</a></li>
                     <li class=""><a href="{% url 'user_examination_report_list_view' %}">Список аттестаций</a></li>
                     <li class="dropdown">
