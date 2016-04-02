@@ -2,7 +2,7 @@ from django import forms
 
 from django_select2.forms import Select2Widget, Select2MultipleWidget
 
-from core.models import User, Examination, Department, Scheduler
+from core.models import User, Examination, Department, Scheduler, UserExamination
 
 
 class UserExaminationReportForm(forms.Form):
@@ -12,6 +12,11 @@ class UserExaminationReportForm(forms.Form):
 
 class UserSearchForm(forms.Form):
     department = forms.ModelChoiceField(label='Отдел', required=False, queryset=Department.objects.all(), widget=Select2Widget)
+
+
+class UserExaminationSearchForm(forms.Form):
+    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.objects.all(), widget=Select2Widget)
+    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
 
 
 class UserCreateForm(forms.ModelForm):
@@ -55,6 +60,18 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'departments',  'is_staff')
+
+
+class UserExaminationEditForm(forms.ModelForm):
+    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.objects.all(), widget=Select2Widget)
+    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
+
+    class Meta:
+        model = UserExamination
+        fields = ('examination', 'user', 'available_from', 'complete_until')
+        widgets = {
+            'available_from': None
+        }
 
 
 class ApiUserImportForm(forms.ModelForm):

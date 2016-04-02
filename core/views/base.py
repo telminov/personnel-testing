@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
-from django.views.generic import UpdateView, ListView as DjangoListView, DetailView as DjangoDetailView
+from django.views.generic import UpdateView, ListView as DjangoListView, DetailView as DjangoDetailView,\
+    View as DjangoView, TemplateView as DjangoTemplateView
 
 
 class TitleMixin(object):
@@ -65,4 +66,12 @@ class ListView(TitleMixin, DjangoListView):
 
 
 class DetailView(TitleMixin, DjangoDetailView):
+    pass
+
+
+class View(TitleMixin, DjangoView):
+    pass
+
+
+class TemplateView(TitleMixin, DjangoTemplateView):
     pass

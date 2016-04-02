@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from core.forms import ExaminationEditForm, ExaminationSearchForm
-from core.models import Examination
+from core.models import Examination, Question
 from core.views.base import CreateOrUpdateView, ListView
 from django.core.urlresolvers import reverse_lazy
 
@@ -37,4 +37,22 @@ class ExaminationCreateOrUpdateView(CreateOrUpdateView):
     template_name = 'core/management/examination_edit.html'
     pk_url_kwarg = 'examination_id'
     success_url = reverse_lazy('examination_list_view')
+
+    def get_title(self):
+        if self.is_create():
+            return 'Создание тестирования'
+        else:
+            return 'Редактирование тестирования %s' % self.get_object()
 examination_create_or_update_view = ExaminationCreateOrUpdateView.as_view()
+
+
+class ExaminationQuestionListView(ListView):
+    model = Question
+    context_object_name = 'questions'
+    template_name = 'core/management/questions.html'
+    title = 'Управление вопросами'
+
+
+
+class ExaminationQuestionCreateOrUpdateView(CreateOrUpdateView):
+    pass

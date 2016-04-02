@@ -1,16 +1,10 @@
 {% extends 'core/base/base.html' %}
 
-{% block sidebar %}
-    <div class="well well-sm">
-        Осталось {{ remains_question_count|default:0 }} вопрос(ов)
-    </div>
-{% endblock sidebar %}
-
 {% block content %}
     <h4>{{ question.body }}</h4>
     <hr/>
 
-    <form class="answer-form" action="{% url 'user_examination_answer_view' user_examination.id question.id %}"
+    <form class="answer-form" action="{% url 'user_examination_answer_view' user_examination.id user_examination_question_log.id %}"
           method="POST">{% csrf_token %}
         {% for answer in answers %}
             <div class="form-group">
@@ -18,7 +12,8 @@
                 <label for="answer{{ answer.id }}">{{ answer.body }}</label>
             </div>
         {% endfor %}
-        <input type="submit" disabled="disabled" class="btn btn-success" value="Ответить">
+        <input type="submit" disabled="disabled" name="submit" class="btn btn-success" value="Ответить">
+        <input type="submit" name="skip" class="btn btn-warning pull-right" value="Пропустить">
 
     </form>
 

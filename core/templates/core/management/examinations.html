@@ -18,6 +18,7 @@
                 <th>Отдел</th>
                 <th>Вопросов</th>
                 <th>Минут на выполнение</th>
+                <th>Действия</th>
             </tr>
         </thead>
     <tbody>
@@ -36,6 +37,9 @@
             </td>
             <td>
                 {{ examination.minutes_to_pass }}
+            </td>
+            <td>
+                <a href="{% url 'examination_update_view' examination.id %}">Назначить вручную</a>
             </td>
         </tr>
 

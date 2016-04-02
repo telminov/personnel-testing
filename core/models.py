@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 import string
 
 import random
@@ -22,7 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email']
 
     def __unicode__(self):
         return self.get_full_name()
@@ -101,32 +102,6 @@ class Question(models.Model):
         verbose_name = 'вопрос'
         verbose_name_plural = 'Вопросы'
 
-    @classmethod
-    def get_remains_for_user_examination(cls, user_examination):
-        user_examination_question_log = UserExaminationQuestionLog.objects.filter(
-            user_examination=user_examination, user_examination_answer_logs__isnull=False
-        )
-
-        return Question.objects.filter(examination=user_examination.examination).exclude(
-            id__in=user_examination_question_log.values_list('question', flat=True)
-        )
-
-    @classmethod
-    def get_next_in_examination(cls, user_examination):
-
-        return Question.objects.filter(examination=user_examination.examination).exclude(
-            id__in=UserExaminationQuestionLog.objects.filter(
-                user_examination=user_examination, user_examination_answer_logs__isnull=False,
-            ).values_list('question', flat=True).order_by('?')
-        )
-
-    @classmethod
-    def get_next_id_in_examination(cls, user_examination):
-        try:
-            return cls.get_next_in_examination(user_examination).values_list('id', flat=True)[0]
-        except Exception as e:
-            return None
-
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers', verbose_name='Вопрос')
@@ -171,9 +146,31 @@ class UserExamination(models.Model):
     def __str__(self):
         return '#%s' % self.id
 
+    def save(self, *args, **kwargs):
+        instance = super(UserExamination, self).save(*args, **kwargs)
+        if not self.logs.exists() and self.examination.questions.all():
+            examination_questions = list(self.examination.questions.all())
+            random.shuffle(examination_questions)
+
+            objects_for_bulk = []
+
+            for position, question in enumerate(examination_questions):
+                question_answers_data = []
+                for answer in question.answers.all():
+                    question_answers_data.append(model_to_dict(answer))
+
+                objects_for_bulk.append(UserExaminationQuestionLog(
+                    position=position, user_examination=self, question=question,
+                    question_data=model_to_dict(question), question_answers_data=question_answers_data
+                ))
+
+            UserExaminationQuestionLog.objects.bulk_create(objects_for_bulk)
+        return instance
+
+
     @classmethod
-    def get_for_user(cls, user, qs=None):
-        return cls.objects.filter(user=user)
+    def get_for_user(cls, user, **kwargs):
+        return cls.objects.filter(user=user, **kwargs)
 
     @classmethod
     def fixed_expired(cls):
@@ -224,14 +221,24 @@ class UserExamination(models.Model):
         self.calculate_points(commit=False)
         self.save()
 
+    def start(self):
+        started_at = datetime.datetime.now()
+        must_finished_at = started_at + datetime.timedelta(minutes=self.examination.minutes_to_pass)
+
+        self.started_at = started_at
+        self.must_finished_at = must_finished_at
+        self.save()
+
     def get_status_color(self):
-        if self.points >= 70:
-            return 'success'
-        else:
+        if self.is_expired:
+            return 'danger'
+        elif self.is_not_passed():
             return 'warning'
+        else:
+            return 'success'
 
     def is_expired(self):
-        return self.points == 0 or self.started_at is None
+        return self.points == 0 and self.finished_at
 
     def is_not_passed(self):
         return self.points < 70
@@ -245,11 +252,15 @@ class UserExamination(models.Model):
 
         points = 0
 
-        questions_count = self.examination.questions.count()
+        question_logs = self.logs.all()
+
+        questions_count = len(question_logs)
         point_for_one_right_answer = float(100) / questions_count
 
-        for question_log in self.user_examination_question_logs.all():
-            right_answers_count = question_log.question.answers.filter(is_right=True).count()
+        for question_log in question_logs:
+
+            right_answers_count = question_log.get_right_answers_count()
+
             right_answers_user_count = 0
             for answer in question_log.user_examination_answer_logs.all():
                 right_answers_user_count += answer.is_right
@@ -266,17 +277,46 @@ class UserExamination(models.Model):
 
 
 class UserExaminationQuestionLog(models.Model):
-    user_examination = models.ForeignKey(UserExamination, related_name='user_examination_question_logs')
-    question = models.ForeignKey(Question, on_delete=DO_NOTHING, related_name='user_examination_question_logs')
+    user_examination = models.ForeignKey(UserExamination, related_name='logs')
+    question = models.ForeignKey(Question, on_delete=DO_NOTHING, related_name='logs')
+
+    position = models.PositiveSmallIntegerField()
 
     question_data = JSONField(default={})
+    question_answers_data = JSONField(default=[])
 
-    started_at = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(null=True)
     finished_at = models.DateTimeField(null=True)
 
+    skipped_at = models.DateTimeField(null=True)
+
+    created_at = models.DateTimeField(auto_now=True)
+
     class Meta:
+        ordering = ['skipped_at', 'position']
         verbose_name = 'Лог ответов'
         verbose_name_plural = 'Лог ответов'
+
+    @classmethod
+    def get_next_id(cls, user_examination):
+        try:
+            return cls.objects.filter(
+                user_examination=user_examination, user_examination_answer_logs__isnull=True
+            ).values_list('id', flat=True)[0]
+        except Exception as e:
+            return None
+
+    @classmethod
+    def get_remains_for_user_examination(cls, user_examination):
+        qs = cls.objects.filter(user_examination=user_examination)
+
+        return qs.count() - qs.filter(finished_at__isnull=False).count()
+
+    def get_right_answers_count(self):
+        return len(
+            [qa['is_right'] for qa in json.loads(self.question_answers_data)
+             if qa['is_right'] is True]
+        )
 
 
 class UserExaminationAnswerLog(models.Model):
@@ -284,7 +324,7 @@ class UserExaminationAnswerLog(models.Model):
                                                       related_name='user_examination_answer_logs')
     is_right = models.BooleanField()
 
-    answer = models.ForeignKey(Answer, on_delete=DO_NOTHING)
+    answer = models.ForeignKey(Answer, null=True, on_delete=DO_NOTHING)
     answer_data = JSONField()
 
     class Meta:
@@ -391,14 +431,14 @@ class Scheduler(models.Model):
 
         for scheduler in cls.objects.filter(is_active=True):
             scheduler_from_dt = scheduler.get_datetime_for_check_period(now)
+            examination = scheduler.examination
 
             for user in scheduler.get_users():
                 if not UserExamination.objects.filter(
-                        user=user, examination=scheduler.examination,
-                        available_from__gte=scheduler_from_dt
+                    user=user, examination=examination, available_from__gte=scheduler_from_dt
                 ).exists():
                     UserExamination.objects.create(
-                        examination=scheduler.examination, user=user, available_from=now,
+                        examination=examination, user=user, available_from=now,
                         complete_until=now + datetime.timedelta(days=7), scheduler=scheduler
                         # TODO hard code 7 days
                     )
