@@ -27,6 +27,10 @@ urlpatterns = [
     url(r'^scheduler/create/$', scheduler.scheduler_create_or_update_view, name='scheduler_create_view'),
     url(r'^scheduler/$', scheduler.scheduler_list_view, name='scheduler_list_view'),
 
+    url(r'^examination/(?P<examination_id>\d+)/questions/(?P<question_id>\d+)/delete/$', examinations.examination_question_delete_view, name='examination_question_delete_view'),
+    url(r'^examination/(?P<examination_id>\d+)/questions/(?P<question_id>\d+)/$', examinations.examination_question_create_or_update_view, name='examination_question_update_view'),
+    url(r'^examination/(?P<examination_id>\d+)/questions/create/$', examinations.examination_question_create_or_update_view, name='examination_question_create_view'),
+    url(r'^examination/(?P<examination_id>\d+)/questions/$', examinations.examination_question_list_view, name='examination_question_list_view'),
     url(r'^examination/(?P<examination_id>\d+)/$', examinations.examination_create_or_update_view, name='examination_update_view'),
     url(r'^examination/create/$', examinations.examination_create_or_update_view, name='examination_create_view'),
     url(r'^examination/$', examinations.examination_list_view, name='examination_list_view'),

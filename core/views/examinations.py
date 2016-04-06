@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from core.forms import ExaminationEditForm, ExaminationSearchForm
+from django.contrib import messages
+from django.shortcuts import redirect
+
+from core.forms import ExaminationEditForm, ExaminationSearchForm, QuestionEditForm
 from core.models import Examination, Question
-from core.views.base import CreateOrUpdateView, ListView
-from django.core.urlresolvers import reverse_lazy
+from core.views.base import CreateOrUpdateView, ListView, ParentListView, ParentCreateOrUpdateView
+from django.core.urlresolvers import reverse_lazy, reverse
 
 
 class ExaminationListView(ListView):
     model = Examination
     context_object_name = 'examinations'
     template_name = 'core/management/examinations.html'
-    title = 'Управление аттестациями'
+    title = 'Управление тестированиями'
 
     def get_queryset(self):
         qs = super(ExaminationListView, self).get_queryset()
@@ -46,13 +49,45 @@ class ExaminationCreateOrUpdateView(CreateOrUpdateView):
 examination_create_or_update_view = ExaminationCreateOrUpdateView.as_view()
 
 
-class ExaminationQuestionListView(ListView):
+class ExaminationQuestionListView(ParentListView):
     model = Question
+    pk_url_kwarg = 'question_id'
+
+    parent_model = Examination
+    parent_pk_url_kwarg = 'examination_id'
+
     context_object_name = 'questions'
+    context_parent_object_name = 'examination'
+
     template_name = 'core/management/questions.html'
-    title = 'Управление вопросами'
+
+    def get_title(self):
+        return 'Управление вопросами тестирования %s' % self.get_parent_object()
+examination_question_list_view = ExaminationQuestionListView.as_view()
 
 
+class ExaminationQuestionCreateOrUpdateView(ParentCreateOrUpdateView):
+    model = Question
+    pk_url_kwarg = 'question_id'
 
-class ExaminationQuestionCreateOrUpdateView(CreateOrUpdateView):
-    pass
+    parent_model = Examination
+    parent_pk_url_kwarg = 'examination_id'
+    parent_field_name = 'examination'
+    context_parent_object_name = 'examination'
+
+    template_name = 'core/management/question_edit.html'
+
+    form_class_create = QuestionEditForm
+    form_class_update = QuestionEditForm
+
+    def get_success_url(self):
+        return reverse_lazy(examination_question_list_view, args=[self.get_parent_object().id])
+
+examination_question_create_or_update_view = ExaminationQuestionCreateOrUpdateView.as_view()
+
+
+def examination_question_delete_view(request, examination_id, question_id):
+    examination = Examination.objects.get(id=examination_id)
+    Question.objects.get(id=question_id, examination=examination).delete()
+    messages.success(request, 'Вопрос успешно удален')
+    return redirect(reverse(examination_question_list_view, args=[examination.id]))

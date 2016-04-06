@@ -2,7 +2,7 @@ from django import forms
 
 from django_select2.forms import Select2Widget, Select2MultipleWidget
 
-from core.models import User, Examination, Department, Scheduler, UserExamination
+from core.models import User, Examination, Department, Scheduler, UserExamination, Question, Answer
 
 
 class UserExaminationReportForm(forms.Form):
@@ -48,6 +48,20 @@ class ExaminationEditForm(forms.ModelForm):
     class Meta:
         model = Examination
         fields = ('name', 'minutes_to_pass', 'department')
+
+
+class QuestionEditForm(forms.ModelForm):
+
+    class Meta:
+        model = Question
+        fields = ('body',)
+
+
+class AnswerEditForm(forms.ModelForm):
+
+    class Meta:
+        model = Answer
+        fields = ('body', 'is_right')
 
 
 class ExaminationSearchForm(forms.Form):

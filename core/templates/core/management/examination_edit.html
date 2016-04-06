@@ -1,9 +1,13 @@
 {% extends 'core/base/base_edit.html' %}
 
-{% block post_form %}
-    <input name="question">
-    <input name="answer">
-    <input name="answer">
-    <input name="answer">
-    <input type="checkbox">
-{% endblock post_form %}
+{% block buttons %}
+    {% load bootstrap3 %}
+    {% buttons layout='horizontal' %}
+        <button type="submit" class="btn btn-success">
+            {% bootstrap_icon "floppy-save" %} Сохранить
+        </button>
+        <a href="{% url 'examination_question_list_view' examination.id %}" class="btn btn-warning">
+            Перейти к вопросам тестирования {% bootstrap_icon "arrow-right" %}
+        </a>
+    {% endbuttons %}
+{% endblock buttons %}

@@ -38,6 +38,12 @@ class CreateOrUpdateView(TitleMixin, UpdateView):
         self.object = form.save(commit=commit)
         return redirect(self.get_success_url())
 
+    def _get_object_from_qs(self, queryset):
+        return queryset.get()
+
+    def _init_object(self):
+        return self.model()
+
     def get_object(self, queryset=None):
         if not self._object:
             if queryset is None:
@@ -54,11 +60,16 @@ class CreateOrUpdateView(TitleMixin, UpdateView):
                     slug_field = self.get_slug_field()
                     queryset = queryset.filter(**{slug_field: slug})
 
-                self._object = queryset.get()
-
+                self._object = self._get_object_from_qs(queryset)
             else:
-                self._object = self.model()
+                self._object = self._init_object()
         return self._object
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateOrUpdateView, self).get_context_data(**kwargs)
+        context['is_update'] = self.is_update()
+        context['is_create'] = self.is_create()
+        return context
 
 
 class ListView(TitleMixin, DjangoListView):
@@ -75,3 +86,52 @@ class View(TitleMixin, DjangoView):
 
 class TemplateView(TitleMixin, DjangoTemplateView):
     pass
+
+
+class ParentMixin(object):
+    parent_pk_url_kwarg = None
+    _parent_object = None
+    parent_model = None
+    context_parent_object_name = 'parent_object'
+
+    def get_parent_queryset(self):
+        return self.parent_model.objects.all()
+
+    def get_parent_object(self, queryset=None):
+        if not self._parent_object:
+            if queryset is None:
+                queryset = self.get_parent_queryset()
+
+            pk = self.kwargs.get(self.parent_pk_url_kwarg, None)
+
+            if pk is not None:
+                queryset = queryset.filter(pk=pk)
+
+                self._parent_object = queryset.get()
+
+            else:
+                self._parent_object = self.model()
+        return self._parent_object
+
+    def get_context_data(self, **kwargs):
+        context = super(ParentMixin, self).get_context_data(**kwargs)
+        context[self.context_parent_object_name] = self.get_parent_object()
+        return context
+
+
+class ParentListView(ParentMixin, ListView):
+
+    def get_queryset(self):
+        qs = super(ParentListView, self).get_queryset()
+        qs = qs.filter(examination=self.get_parent_object())
+        return qs
+
+
+class ParentCreateOrUpdateView(ParentMixin, CreateOrUpdateView):
+    parent_field_name = None
+
+    def _init_object(self):
+        return self.model(**{self.parent_field_name: self.get_parent_object()})
+
+    def _get_object_from_qs(self, queryset):
+        return queryset.get(**{self.parent_field_name: self.get_parent_object()})
