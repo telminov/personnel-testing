@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from core.forms import UserExaminationSearchForm, UserExaminationEditForm
-from core.models import UserExamination
+from core.models import UserExamination, Examination
 from core.views.base import CreateOrUpdateView, ListView
 from django.core.urlresolvers import reverse_lazy
 
@@ -35,4 +35,10 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
     template_name = 'core/base/base_edit.html'
     pk_url_kwarg = 'user_examination_id'
     success_url = reverse_lazy('user_examination_list_view')
+
+    def get_initial(self):
+        initial = {}
+        if self.is_create() and self.request.GET.get('examination'):
+            initial['examination'] = Examination.objects.get(id=self.request.GET['examination'])
+        return initial
 user_examination_create_or_update_view = UserExaminationCreateOrUpdateView.as_view()
