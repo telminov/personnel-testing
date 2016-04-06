@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from core.forms import ExaminationEditForm, ExaminationSearchForm, QuestionEditForm
-from core.models import Examination, Question
+from core.forms import ExaminationEditForm, ExaminationSearchForm, QuestionEditForm, AnswerEditForm
+from core.models import Examination, Question, Answer
 from core.views.base import CreateOrUpdateView, ListView, ParentListView, ParentCreateOrUpdateView
 from django.core.urlresolvers import reverse_lazy, reverse
 
@@ -83,6 +83,11 @@ class ExaminationQuestionCreateOrUpdateView(ParentCreateOrUpdateView):
     def get_success_url(self):
         return reverse_lazy(examination_question_list_view, args=[self.get_parent_object().id])
 
+    def get_context_data(self, **kwargs):
+        context = super(ExaminationQuestionCreateOrUpdateView, self).get_context_data(**kwargs)
+        context['answers'] = self.get_object().answers.all()
+        return context
+
 examination_question_create_or_update_view = ExaminationQuestionCreateOrUpdateView.as_view()
 
 
@@ -91,3 +96,32 @@ def examination_question_delete_view(request, examination_id, question_id):
     Question.objects.get(id=question_id, examination=examination).delete()
     messages.success(request, 'Вопрос успешно удален')
     return redirect(reverse(examination_question_list_view, args=[examination.id]))
+
+
+class QuestionAnswerCreateOrUpdateView(ParentCreateOrUpdateView):
+    model = Answer
+    pk_url_kwarg = 'answer_id'
+
+    parent_model = Question
+    parent_pk_url_kwarg = 'question_id'
+    parent_field_name = 'question'
+    context_parent_object_name = 'question'
+
+    template_name = 'core/management/answer_edit.html'
+
+    form_class_create = AnswerEditForm
+    form_class_update = AnswerEditForm
+
+    def get_success_url(self):
+        return reverse_lazy('examination_question_update_view', args=[
+            self.get_parent_object().examination_id, self.get_parent_object().id
+        ])
+
+question_answer_create_or_update_view = QuestionAnswerCreateOrUpdateView.as_view()
+
+
+def question_answer_delete_view(request, examination_id, question_id, answer_id):
+    question = Question.objects.get(id=question_id, examination_id=examination_id)
+    Answer.objects.get(question=question, id=answer_id).delete()
+    messages.success(request, 'Ответ успешно удален')
+    return redirect(reverse('examination_question_update_view', args=[examination_id, question_id]))

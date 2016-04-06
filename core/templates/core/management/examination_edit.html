@@ -6,8 +6,10 @@
         <button type="submit" class="btn btn-success">
             {% bootstrap_icon "floppy-save" %} Сохранить
         </button>
+        {% if is_update %}
         <a href="{% url 'examination_question_list_view' examination.id %}" class="btn btn-warning">
             Перейти к вопросам тестирования {% bootstrap_icon "arrow-right" %}
         </a>
+        {% endif %}
     {% endbuttons %}
 {% endblock buttons %}

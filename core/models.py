@@ -230,7 +230,7 @@ class UserExamination(models.Model):
         self.save()
 
     def get_status_color(self):
-        if self.is_expired:
+        if not self.points and self.is_expired():
             return 'danger'
         elif self.is_not_passed():
             return 'warning'

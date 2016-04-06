@@ -7,14 +7,9 @@
             {% bootstrap_icon "floppy-save" %} Сохранить
         </button>
         {% if is_update %}
-
-        <a id="delete" data-body="{{ question.body }}" href="{% url 'examination_question_delete_view' examination.id question.id %}"
-           class="btn btn-danger pull-right" style="margin-left: 10px;">
+        <a id="delete" data-body="{{ answer.body }}" href="{% url 'question_answer_delete_view' question.examination_id question.id answer.id %}"
+           class="btn btn-danger pull-right">
         {% bootstrap_icon "trash" %} Удалить</a>
-
-        <a href="{% url 'question_answer_create_view' examination.id question.id %}" class="btn btn-warning pull-right">
-        {% bootstrap_icon "plus" %} Добавить ответ</a>
-
         {% endif %}
     {% endbuttons %}
 
@@ -38,28 +33,6 @@
     </div>
 
 {% endblock buttons %}
-
-{% block post_form %}
-    <hr/>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Текст ответа</th>
-                <th>Правильность</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for answer in answers %}
-        <tr>
-            <td>{{ answer.body }}</td>
-            <td>{{ answer.is_right|yesno:'правильный, не правильный' }}</td>
-            <td><a href="{% url 'question_answer_update_view' question.examination_id question.id answer.id %}">Редактировать</a></td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endblock post_form %}
 
 {% block js %}
     <script>

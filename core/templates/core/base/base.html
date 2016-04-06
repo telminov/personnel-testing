@@ -9,6 +9,9 @@
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.theme.min.css"/>
     {{ form.media.css }}
 
 </head>
@@ -85,6 +88,7 @@
 <script src="{{ STATIC_URL }}core/js/jquery-2.2.0.min.js"></script>
 <script src="{{ STATIC_URL }}core/js/bootstrap.min.js"></script>
 <script src="{{ STATIC_URL }}core/js/datatables.min.js"></script>
+<script src="{{ STATIC_URL }}core/js/jquery-ui.min.js"></script>
 {{ form.media.js }}
 <script>
     var dataTableDefaultLanguage = {
@@ -116,6 +120,8 @@
            info : false,
            language: dataTableDefaultLanguage
         });
+
+        $('.datetimepicker').datetimepicker();
     });
 </script>
 
