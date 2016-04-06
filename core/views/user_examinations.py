@@ -11,12 +11,12 @@ class UserExaminationListView(ListView):
     model = UserExamination
     context_object_name = 'user_examinations'
     template_name = 'core/management/user_examinations.html'
-    title = 'Управление аттестациями пользователей'
+    title = 'Управление тестированиями пользователей'
 
     def get_queryset(self):
         qs = super(UserExaminationListView, self).get_queryset()
         if self.request.GET.get('user'):
-            qs = qs.filter(user=self.request.GET['users'])
+            qs = qs.filter(user=self.request.GET['user'])
         if self.request.GET.get('examination'):
             qs = qs.filter(examination=self.request.GET['examination'])
         return qs
@@ -34,7 +34,7 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
     form_class_update = UserExaminationEditForm
     template_name = 'core/base/base_edit.html'
     pk_url_kwarg = 'user_examination_id'
-    success_url = reverse_lazy('user_examination_list_view')
+    success_url = reverse_lazy('management_user_examination_list_view')
 
     def get_initial(self):
         initial = {}

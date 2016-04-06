@@ -45,7 +45,7 @@ class ExaminationCreateOrUpdateView(CreateOrUpdateView):
         if self.is_create():
             return 'Создание тестирования'
         else:
-            return 'Редактирование тестирования %s' % self.get_object()
+            return 'Редактирование тестирования «%s»' % self.get_object()
 examination_create_or_update_view = ExaminationCreateOrUpdateView.as_view()
 
 
@@ -62,7 +62,7 @@ class ExaminationQuestionListView(ParentListView):
     template_name = 'core/management/questions.html'
 
     def get_title(self):
-        return 'Управление вопросами тестирования %s' % self.get_parent_object()
+        return 'Управление вопросами тестирования «%s»' % self.get_parent_object()
 examination_question_list_view = ExaminationQuestionListView.as_view()
 
 
@@ -79,6 +79,12 @@ class ExaminationQuestionCreateOrUpdateView(ParentCreateOrUpdateView):
 
     form_class_create = QuestionEditForm
     form_class_update = QuestionEditForm
+
+    def get_title(self):
+        if self.is_create():
+            return 'Создание вопроса для тестирования «%s»' % self.get_parent_object()
+        else:
+            return 'Редактирование вопроса для тестирования «%s»' % self.get_parent_object()
 
     def get_success_url(self):
         return reverse_lazy(examination_question_list_view, args=[self.get_parent_object().id])
@@ -116,6 +122,12 @@ class QuestionAnswerCreateOrUpdateView(ParentCreateOrUpdateView):
         return reverse_lazy('examination_question_update_view', args=[
             self.get_parent_object().examination_id, self.get_parent_object().id
         ])
+
+    def get_title(self):
+        if self.is_create():
+            return 'Создание ответа на вопрос «%s»' % self.get_parent_object()
+        else:
+            return 'Редактирование ответа на вопрос «%s»' % self.get_parent_object()
 
 question_answer_create_or_update_view = QuestionAnswerCreateOrUpdateView.as_view()
 

@@ -40,6 +40,7 @@
 {% endblock buttons %}
 
 {% block post_form %}
+    {% if is_update %}
     <hr/>
     <table class="table table-bordered">
         <thead>
@@ -59,6 +60,7 @@
         {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 {% endblock post_form %}
 
 {% block js %}

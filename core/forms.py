@@ -84,7 +84,8 @@ class UserExaminationEditForm(forms.ModelForm):
         model = UserExamination
         fields = ('examination', 'user', 'available_from', 'complete_until')
         widgets = {
-            'available_from': forms.DateTimeInput(attrs={'class': 'datetimepicker'})
+            'available_from': forms.DateTimeInput(attrs={'class': 'datetimepicker'}),
+            'complete_until': forms.DateTimeInput(attrs={'class': 'datetimepicker'})
         }
 
 

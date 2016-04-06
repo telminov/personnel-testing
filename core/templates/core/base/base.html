@@ -9,9 +9,7 @@
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/style.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.min.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.structure.min.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery-ui.theme.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}core/css/jquery.datetimepicker.css"/>
     {{ form.media.css }}
 
 </head>
@@ -63,56 +61,19 @@
 
     <div class="content">
         <div class="col-lg-12">
-        {% block content %}
-        {% endblock content %}
+            {% block content %}
+            {% endblock content %}
         </div>
-{#    <div class="col-lg-2">#}
-{#        {% block sidebar %}#}
-{#        {% endblock sidebar %}#}
-{#        <div class="well well-sm">#}
-{#            <h4>Привет</h4>#}
-{#            <span>Я небольшая новость или подсказка</span>#}
-{#        </div>#}
-{#        <div class="well well-sm">#}
-{#            <div class="row">#}
-{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
-{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
-{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
-{#            <a class="col-lg-12" href="#">Набор ссылок</a>#}
-{#                </div>#}
-{#        </div>#}
-{#    </div>#}
     </div>
 </div>
 
 <script src="{{ STATIC_URL }}core/js/jquery-2.2.0.min.js"></script>
 <script src="{{ STATIC_URL }}core/js/bootstrap.min.js"></script>
 <script src="{{ STATIC_URL }}core/js/datatables.min.js"></script>
-<script src="{{ STATIC_URL }}core/js/jquery-ui.min.js"></script>
+<script src="{{ STATIC_URL }}core/js/jquery.datetimepicker.full.min.js"></script>
+<script src="{{ STATIC_URL }}core/js/datatables-ru.js"></script>
 {{ form.media.js }}
 <script>
-    var dataTableDefaultLanguage = {
-      "processing": "Подождите...",
-      "search": "Поиск:",
-      "lengthMenu": "Показать _MENU_ записей",
-      "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
-      "infoEmpty": "Записи с 0 до 0 из 0 записей",
-      "infoFiltered": "(отфильтровано из _MAX_ записей)",
-      "infoPostFix": "",
-      "loadingRecords": "Загрузка записей...",
-      "zeroRecords": "Записи отсутствуют.",
-      "emptyTable": "Данные отсутствуют",
-      "paginate": {
-        "first": "Первая",
-        "previous": "Предыдущая",
-        "next": "Следующая",
-        "last": "Последняя"
-      },
-      "aria": {
-        "sortAscending": ": активировать для сортировки столбца по возрастанию",
-        "sortDescending": ": активировать для сортировки столбца по убыванию"
-      }
-    };
     $(document).ready(function(){
        $('table').DataTable( {
             paging: false,
@@ -120,8 +81,8 @@
            info : false,
            language: dataTableDefaultLanguage
         });
-
-        $('.datetimepicker').datetimepicker();
+        $.datetimepicker.setLocale('ru');
+        $('.datetimepicker').datetimepicker({format:'d.m.Y H:i'});
     });
 </script>
 

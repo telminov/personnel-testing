@@ -40,5 +40,5 @@ urlpatterns = [
 
     url(r'^user_examination/(?P<user_examination_id>\d+)/$', user_examinations.user_examination_create_or_update_view, name='user_examination_update_view'),
     url(r'^user_examination/create/$', user_examinations.user_examination_create_or_update_view, name='user_examination_create_view'),
-    url(r'^user_examination/$', user_examinations.user_examination_list_view, name='user_examination_list_view'),
+    url(r'^user_examination/$', user_examinations.user_examination_list_view, name='management_user_examination_list_view'),
 ]
