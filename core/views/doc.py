@@ -1,0 +1,2 @@
+def doc(request):
+    pass

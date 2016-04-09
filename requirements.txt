@@ -1,4 +1,4 @@
-Django==1.9.4
+Django==1.9.5
 gunicorn==19.4.5
 python-dateutil==2.4.2
 ipython==4.1.2

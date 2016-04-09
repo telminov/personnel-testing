@@ -68,6 +68,15 @@ class ExaminationSearchForm(forms.Form):
     pass
 
 
+class DepartmentEditForm(forms.ModelForm):
+    responsible = forms.ModelMultipleChoiceField(label='Ответственные', required=False, queryset=User.objects.all(), widget=Select2MultipleWidget)
+    employees = forms.ModelMultipleChoiceField(label='Сотрудники', required=False, queryset=User.objects.all(), widget=Select2MultipleWidget)
+
+    class Meta:
+        model = Department
+        fields = ('name', 'responsible', 'employees')
+
+
 class UserUpdateForm(forms.ModelForm):
     departments = forms.ModelMultipleChoiceField(label='Отделы', required=False, queryset=Department.objects.all(), widget=Select2MultipleWidget)
 
