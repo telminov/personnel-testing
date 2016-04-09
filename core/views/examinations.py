@@ -39,13 +39,15 @@ class ExaminationCreateOrUpdateView(CreateOrUpdateView):
     form_class_update = ExaminationEditForm
     template_name = 'core/management/examination_edit.html'
     pk_url_kwarg = 'examination_id'
-    success_url = reverse_lazy('examination_list_view')
 
     def get_title(self):
         if self.is_create():
             return 'Создание тестирования'
         else:
             return 'Редактирование тестирования «%s»' % self.get_object()
+
+    def get_success_url(self):
+        return reverse('examination_update_view', args=[self.get_object().id])
 examination_create_or_update_view = ExaminationCreateOrUpdateView.as_view()
 
 

@@ -1,2 +1,5 @@
+from django.shortcuts import render
+
+
 def doc(request):
-    pass
+    return render(request, 'core/doc.html', {'title': 'Инструкция'})

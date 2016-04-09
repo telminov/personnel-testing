@@ -4,7 +4,7 @@
     {% block filter %}
     {% load bootstrap3 %}
       {% buttons layout='horizontal' %}
-        <a href="{% url 'examination_question_create_view' %}" type="submit" class="btn btn-info pull-right">
+        <a href="{% url 'examination_question_create_view' examination.id %}" type="submit" class="btn btn-info pull-right">
           {% bootstrap_icon "plus" %} Добавить
         </a>
       {% endbuttons %}

@@ -1,0 +1,75 @@
+{% extends 'core/base/base.html' %}
+
+{% block content %}
+
+    {% load bootstrap3 %}
+
+    <div class="row row-offcanvas row-offcanvas-right">
+
+        <div class="col-xs-12 col-sm-9">
+          <div class="row">
+            <div id="users" class="col-xs-12">
+              <h2>Пользователи</h2>
+              <p>Для создания новых пользователей необходим перейти в интерфейс
+                  <a target="_blank" href="{% url 'user_list_view' %}">управления пользователями</a>.</p>
+                <p>
+                    Для добавления нового пользователя необходимо нажать на кнопку
+                    <a target="_blank" href="{% url 'user_create_view' %}" class="btn btn-info">
+                      {% bootstrap_icon "plus" %} Добавить
+                    </a>
+                </p>
+            </div>
+            <div id="departments" class="col-xs-12">
+              <h2>Отделы</h2>
+
+              <p>Для создания новых отделов необходим перейти в интерфейс
+                  <a target="_blank" href="{% url 'department_list_view' %}">управления отделами</a>.</p>
+                <p>
+                    Для добавления нового тестирования необходимо нажать на кнопку
+                    <a target="_blank" href="{% url 'department_create_view' %}" class="btn btn-info">
+                      {% bootstrap_icon "plus" %} Добавить
+                    </a>
+                </p>
+                <p>
+                    После успешного сохранения необходимо перейти к интерфейсу управления вопросами, нажав на кнопку
+        <a onclick="return false;" class="btn btn-warning">
+            Перейти к вопросам тестирования {% bootstrap_icon "arrow-right" %}
+        </a>
+                </p>
+            </div>
+            <div id="examinations" class="col-xs-12">
+              <h2>Тестирования</h2>
+
+              <p>Для создания нового тестирования необходимо перейти в интерфейс
+                  <a target="_blank" href="{% url 'examination_list_view' %}">управления тестированиями</a>.</p>
+                <p>
+                    Для добавления нового отдела необходимо нажать на кнопку
+                    <a target="_blank" href="{% url 'department_create_view' %}" class="btn btn-info">
+                      {% bootstrap_icon "plus" %} Добавить
+                    </a>
+                </p>
+              <p></p>
+            </div>
+            <div id="scheduler" class="col-xs-12">
+              <h2>Расписания</h2>
+              <p></p>
+            </div>
+            <div id="user-examinations" class="col-xs-12">
+              <h2>Тестирования пользователя</h2>
+              <p></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-6 col-sm-3" id="sidebar">
+          <div class="list-group">
+            <a href="#users" class="list-group-item">Пользователи</a>
+            <a href="#departments" class="list-group-item">Отделы</a>
+            <a href="#examinations" class="list-group-item">Тестирования</a>
+            <a href="#scheduler" class="list-group-item">Расписания</a>
+            <a href="#user-examinations" class="list-group-item">Тестирования пользователя</a>
+          </div>
+        </div>
+      </div>
+
+{% endblock content %}
