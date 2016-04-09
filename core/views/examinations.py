@@ -121,15 +121,27 @@ class QuestionAnswerCreateOrUpdateView(ParentCreateOrUpdateView):
     form_class_update = AnswerEditForm
 
     def get_success_url(self):
-        return reverse_lazy('examination_question_update_view', args=[
-            self.get_parent_object().examination_id, self.get_parent_object().id
-        ])
+        if 'another_one' in self.request.POST:
+            return reverse('question_answer_create_view', args=[
+                self.get_parent_object().examination_id, self.get_parent_object().id
+            ])
+        else:
+            return reverse('examination_question_update_view', args=[
+                self.get_parent_object().examination_id, self.get_parent_object().id
+            ])
 
     def get_title(self):
         if self.is_create():
             return 'Создание ответа на вопрос «%s»' % self.get_parent_object()
         else:
             return 'Редактирование ответа на вопрос «%s»' % self.get_parent_object()
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionAnswerCreateOrUpdateView, self).get_context_data(**kwargs)
+        context['back_url'] = reverse('examination_question_update_view', args=[
+            self.get_parent_object().examination_id, self.get_parent_object().id
+        ])
+        return context
 
 question_answer_create_or_update_view = QuestionAnswerCreateOrUpdateView.as_view()
 

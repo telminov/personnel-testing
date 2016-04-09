@@ -9,8 +9,8 @@ urlpatterns = [
     url(r'^(?P<user_examination_id>\d+)/(?P<user_examination_question_log_id>\d+)/$', examination.user_examination_process_view, name='user_examination_answer_view'),
     url(r'^view/(?P<user_examination_id>\d+)/$', examination.user_examination_detail_view, name='user_examination_detail_view'),
 
-    url(r'^api/import/department/$', api.department_import, name='department_import'),
-    url(r'^api/import/user/$', api.user_import, name='user_import'),
+    # url(r'^api/import/department/$', api.department_import, name='department_import'),
+    # url(r'^api/import/user/$', api.user_import, name='user_import'),
 
     url(r'^adm/report/$', report.user_examination_report_list_view, name='user_examination_report_list_view'),
 

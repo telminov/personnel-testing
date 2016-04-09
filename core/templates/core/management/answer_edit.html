@@ -3,8 +3,13 @@
 {% block buttons %}
     {% load bootstrap3 %}
     {% buttons layout='horizontal' %}
+        <a href="{% url 'examination_question_update_view' question.examination.id question.id %}" class="btn btn-info">
+        {% bootstrap_icon "arrow-left" %} Назад</a>
         <button type="submit" class="btn btn-success">
             {% bootstrap_icon "floppy-save" %} Сохранить
+        </button>
+        <button type="submit" name="another_one" class="btn btn-success">
+            {% bootstrap_icon "floppy-save" %} Сохранить и добавить еще
         </button>
         {% if is_update %}
         <a id="delete" data-body="{{ answer.body }}" href="{% url 'question_answer_delete_view' question.examination_id question.id answer.id %}"

@@ -54,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Department(models.Model):
     """ Отдел """
-    name = models.CharField(max_length=255, verbose_name='Название')
+    name = models.CharField(max_length=255, unique=True, verbose_name='Название')
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children',
                                verbose_name='Родительский отдел')
     responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True,
