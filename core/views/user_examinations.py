@@ -34,7 +34,7 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
     form_class_update = UserExaminationEditForm
     template_name = 'core/base/base_edit.html'
     pk_url_kwarg = 'user_examination_id'
-    success_url = reverse_lazy('management_user_examination_list_view')
+    success_url = reverse_lazy('adm_user_examination_list_view')
 
     def get_initial(self):
         initial = {}

@@ -20,7 +20,7 @@
     <div class="container">
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav" style="width: 100%">
-                <li class=""><a href="/">Главная</a></li>
+                <li class=""><a href="{% url 'user_examination_list_view' %}">Главная</a></li>
                 {% if request.user.is_staff %}
                     <li class=""><a href="{% url 'departments_report_list_view' %}">Отчеты по прохождениям</a></li>
                     <li class=""><a href="{% url 'user_examination_report_list_view' %}">Список тестирований</a></li>
@@ -29,12 +29,11 @@
                       <ul class="dropdown-menu">
                         <li><a href="{% url 'user_list_view' %}">Пользователи</a></li>
                         <li><a href="{% url 'department_list_view' %}">Отделы</a></li>
-                        <li><a href="{% url 'examination_list_view' %}">Тестирования</a></li>
+                        <li><a href="{% url 'adm_examination_list_view' %}">Тестирования</a></li>
                         <li><a href="{% url 'scheduler_list_view' %}">Расписания</a></li>
-                        <li><a href="{% url 'user_examination_list_view' %}">Тестирования пользователя</a></li>
+                        <li><a href="{% url 'adm_user_examination_list_view' %}">Тестирования пользователя</a></li>
                       </ul>
                     </li>
-                    <li class=""><a href="{% url 'doc' %}">Док</a></li>
                 {% endif %}
                 <li class="dropdown pull-right">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">

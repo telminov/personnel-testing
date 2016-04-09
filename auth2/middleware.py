@@ -22,3 +22,10 @@ class LoginRequiredMiddleware(object):
                 return redirect_to_home
 
         return None
+
+
+class AdminPermissionMiddleware(object):
+
+    def process_request(self, request):
+        if request.path.startswith('/adm/') and not request.user.is_staff:
+            return redirect('/')

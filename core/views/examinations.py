@@ -89,7 +89,7 @@ class ExaminationQuestionCreateOrUpdateView(ParentCreateOrUpdateView):
             return 'Редактирование вопроса для тестирования «%s»' % self.get_parent_object()
 
     def get_success_url(self):
-        return reverse_lazy(examination_question_list_view, args=[self.get_parent_object().id])
+        return reverse_lazy(examination_question_create_or_update_view, args=[self.get_parent_object().id, self.get_object().id])
 
     def get_context_data(self, **kwargs):
         context = super(ExaminationQuestionCreateOrUpdateView, self).get_context_data(**kwargs)

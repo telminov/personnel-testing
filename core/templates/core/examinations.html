@@ -20,7 +20,7 @@
                         <a id="start"
                            data-started-at="{{ user_examination.started_at|default:'' }}"
                            data-minutes-to-pass="{{ user_examination.examination.minutes_to_pass }}"
-                           href="{% url 'user_examination_question_detail_view' user_examination.id %}">
+                           href="{% url 'user_examination_answer_view' user_examination.id %}">
                             {{ user_examination.examination.name }}
                         </a>
                     </td>

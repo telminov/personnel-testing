@@ -12,8 +12,11 @@
            class="btn btn-danger pull-right" style="margin-left: 10px;">
         {% bootstrap_icon "trash" %} Удалить</a>
 
-        <a href="{% url 'question_answer_create_view' examination.id question.id %}" class="btn btn-warning pull-right">
+
+        <a href="{% url 'question_answer_create_view' examination.id question.id %}" class="btn btn-warning pull-right" style="margin-left: 10px;">
         {% bootstrap_icon "plus" %} Добавить ответ</a>
+        <a href="{% url 'examination_question_list_view' examination.id %}" class="btn btn-info pull-right">
+        {% bootstrap_icon "arrow-left" %} Назад списку вопросов</a>
 
         {% endif %}
     {% endbuttons %}
