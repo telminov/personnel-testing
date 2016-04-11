@@ -57,5 +57,8 @@ class UserCreateOrUpdateView(CreateOrUpdateView):
         else:
             user = self.get_object()
             return 'Редактирование пользователя %s (%s)' % (user.username, user.email or 'email отсутствует')
-
 user_create_or_update_view = UserCreateOrUpdateView.as_view()
+
+
+class UserDeleteView(DeleteView):
+    pass

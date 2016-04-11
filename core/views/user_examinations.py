@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.shortcuts import redirect
+
 from core.forms import UserExaminationSearchForm, UserExaminationEditForm
 from core.models import UserExamination, Examination
 from core.views.base import CreateOrUpdateView, ListView
@@ -41,4 +43,10 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
         if self.is_create() and self.request.GET.get('examination'):
             initial['examination'] = Examination.objects.get(id=self.request.GET['examination'])
         return initial
+
+    def form_valid(self, form, commit=True):
+        self.object = form.save()
+        self.object.created_by = self.request.user
+        self.object.save()
+        return redirect(self.get_success_url())
 user_examination_create_or_update_view = UserExaminationCreateOrUpdateView.as_view()

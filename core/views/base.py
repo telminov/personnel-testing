@@ -1,6 +1,6 @@
 from django.shortcuts import redirect
 from django.views.generic import UpdateView, ListView as DjangoListView, DetailView as DjangoDetailView,\
-    View as DjangoView, TemplateView as DjangoTemplateView
+    View as DjangoView, TemplateView as DjangoTemplateView, DeleteView as DjangoDeleteView
 
 
 class TitleMixin(object):
@@ -70,6 +70,10 @@ class CreateOrUpdateView(TitleMixin, UpdateView):
         context['is_update'] = self.is_update()
         context['is_create'] = self.is_create()
         return context
+
+
+class DeleteView(TitleMixin, DjangoDeleteView):
+    pass
 
 
 class ListView(TitleMixin, DjangoListView):

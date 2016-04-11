@@ -129,6 +129,7 @@ class UserExamination(models.Model):
     complete_until = models.DateTimeField(db_index=True, verbose_name='Надо выполнить до')
 
     scheduler = models.ForeignKey('Scheduler', null=True, blank=True, on_delete=DO_NOTHING, related_name='user_examinaions')
+    created_by = models.ForeignKey('User', null=True, blank=True, on_delete=DO_NOTHING, related_name='user_examinaions')
 
     started_at = models.DateTimeField(null=True, blank=True, verbose_name='Начат')
     must_finished_at = models.DateTimeField(null=True, blank=True, verbose_name='Обязан закончить до')
