@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from core.forms import UserCreateForm, UserSearchForm, UserUpdateForm
 from core.models import User
-from core.views.base import CreateOrUpdateView, ListView
+from core.views.base import CreateOrUpdateView, ListView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 
 
@@ -61,4 +61,4 @@ user_create_or_update_view = UserCreateOrUpdateView.as_view()
 
 
 class UserDeleteView(DeleteView):
-    pass
+    model = User
