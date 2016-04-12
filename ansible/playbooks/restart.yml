@@ -1,0 +1,9 @@
+---
+- name: Stop supervisord personnel_testing
+  shell: /usr/bin/supervisorctl -c /etc/supervisor/supervisord.conf stop personnel_testing
+
+- name: Wait 3 secods
+  shell: sleep 3
+
+- name: Start supervisord personnel_testing
+  shell: /usr/bin/supervisorctl -c /etc/supervisor/supervisord.conf start personnel_testing

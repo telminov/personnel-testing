@@ -1,3 +1,4 @@
+# coding: utf-8
 from django import forms
 
 from django_select2.forms import Select2Widget, Select2MultipleWidget

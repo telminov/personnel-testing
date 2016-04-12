@@ -1,0 +1,7 @@
+[program:personnel_testing_webserver]
+directory = {{ repo_path }}
+user = personnel_testing
+command = {{ virtualenv_python }} {{ repo_path }}/manage.py runfcgi method=prefork minspare=2 maxspare=3 host=127.0.0.1 port=8879 daemonize=false
+stdout_logfile = /var/log/personnel_testing.log
+stderr_logfile = /var/log/personnel_testing.log
+

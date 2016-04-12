@@ -1,0 +1,87 @@
+# ansible-playbook -i prod install_webserver.yml --ask-sudo-pass -v
+---
+- hosts: webserver
+  sudo: yes
+#  remote_user: root
+
+  vars:
+    virtualenv_path: /home/personnel_testing/virt_env
+    virtualenv_python: /home/personnel_testing/virt_env/bin/python
+    virtualenv_user: personnel_testing
+    repo_path: /home/personnel_testing/repo
+    requirements_path: "{{ repo_path }}/requirements.txt"
+    log_path: /var/log/personnel_testing
+
+  tasks:
+    - include: playbooks/install_packages.yml
+
+    - name: Create personnel_testing user
+      user: name=personnel_testing state=present
+
+    - name: Create ssh directory
+      file: path=/home/personnel_testing/.ssh state=directory owner=personnel_testing mode=0755
+      sudo_user: personnel_testing
+
+    - name: Get personnel-testing repo
+      git: repo=https://github.com/telminov/personnel-testing.git dest={{ repo_path }}
+
+    - name: Change permissions
+      file: path={{ repo_path }} owner=personnel_testing group=personnel_testing state=directory recurse=yes
+
+    - include: playbooks/intall_virtualenv.yml
+
+
+    - name: settings.py file stat
+      stat: path={{ repo_path }}/project/settings.py
+      register: st
+
+    - name: Copy settings.py if not exists
+      template: src=templates/settings.py.jinja2 dest={{ repo_path }}/project/settings.py owner=personnel_testing mode=0600
+      when: not st.stat.exists
+
+
+    - name: Create static directory
+      file: path={{ repo_path }}/static owner=personnel_testing state=directory mode=0755 recurse=yes
+
+    - name: Collect static
+      shell: "{{ virtualenv_path }}/bin/python {{ repo_path }}/manage.py collectstatic --noinput"
+      sudo_user: personnel_testing
+
+    - name: Make migrations
+      shell: "{{ virtualenv_path }}/bin/python {{ repo_path }}/manage.py migrate --noinput"
+      sudo_user: personnel_testing
+
+    - name: Create www log directory
+      file: path={{ log_path }}/www owner=www-data state=directory
+
+    - name: Create www directory for apache fastcgi
+      file: path=/var/www/personnel_testing owner=www-data state=directory
+
+    - name: Remove old static files
+      file: path=/var/www/personnel_testing/static state=absent
+
+    - name: Copy static files
+      shell: cp -R {{ repo_path }}/static /var/www/personnel_testing/static
+
+    - name: Change www directory owner
+      file: path=/var/www/personnel_testing owner=www-data state=directory recurse=yes
+
+    - name: Create apache cofig file
+      template: src=templates/apache2.jinja2 dest=/etc/apache2/sites-available/personnel_testing owner=root mode=0644
+
+    - name: Restart apache2
+      service: name=apache2 state=restarted
+
+
+    - name: Copy supervisor personnel_testing conf
+      template: src=templates/supervisor.conf.jinja2 dest=/etc/supervisor/conf.d/personnel_testing.conf
+
+    - name: reread supervisor config
+      shell: /usr/bin/supervisorctl -c /etc/supervisor/supervisord.conf reread && /usr/bin/supervisorctl update
+
+    - name: update supervisor config
+      shell: /usr/bin/supervisorctl -c /etc/supervisor/supervisord.conf update
+
+    - include: playbooks/restart.yml
+
+

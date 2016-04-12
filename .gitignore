@@ -4,3 +4,5 @@ project/settings.py
 *.sqlite3
 virt_env
 virtualenv
+
+ansible/prod

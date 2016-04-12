@@ -1,0 +1,18 @@
+FastCGIExternalServer /var/www/personnel_testing/personnel_testing.fcgi -host 127.0.0.1:8879
+
+<VirtualHost {{ allowed_host }}:80>
+    ServerName personnel-testing.soft-way.biz
+    DocumentRoot /var/www/personnel_testing
+    ServerAdmin support@soft-way.biz
+
+    ErrorLog {{ log_path }}/www/error.log
+    CustomLog {{ log_path }}/www/access.log common
+
+    Alias /static /var/www/personnel_testing/static
+
+    RewriteEngine On
+    RewriteRule ^/(static.*)$ /$1 [QSA,L,PT]
+    RewriteRule ^/(npm.*)$ /$1 [QSA,L,PT]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/(.*)$ /personnel_testing.fcgi/$1 [QSA,L]
+</VirtualHost>

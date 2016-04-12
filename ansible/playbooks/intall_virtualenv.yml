@@ -1,0 +1,11 @@
+- name: Install virtualenv
+  easy_install: name=virtualenv
+
+- name: Create virtualenv personnel_testing directory
+  file: path={{ virtualenv_path }} state=directory owner={{ virtualenv_user }}
+
+- name: Install virtualenv requiremenets
+  pip: virtualenv={{ virtualenv_path }}
+       virtualenv_site_packages=yes
+       requirements={{ requirements_path }}
+  sudo_user: personnel_testing
