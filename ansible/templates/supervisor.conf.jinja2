@@ -1,7 +1,28 @@
 [program:personnel_testing_webserver]
 directory = {{ repo_path }}
 user = personnel_testing
-command = {{ virtualenv_python }} {{ repo_path }}/manage.py runfcgi method=prefork minspare=2 maxspare=3 host=127.0.0.1 port=8879 daemonize=false
-stdout_logfile = /var/log/personnel_testing.log
-stderr_logfile = /var/log/personnel_testing.log
+command = {{ virtualenv_path }}/bin/gunicorn project.wsgi  --bind=127.0.0.1:8879 --workers=5
+stdout_logfile = /var/log/personnel_testing/webserver.log
+stderr_logfile = /var/log/personnel_testing/webserver.log
+
+[program:personnel_testing_schedule]
+directory = {{ repo_path }}
+user = personnel_testing
+command = {{ virtualenv_python }} manage.py schedule --infinite
+stdout_logfile = /var/log/personnel_testing/schedule.log
+stderr_logfile = /var/log/personnel_testing/schedule.log
+
+[program:personnel_testing_fix_expired_user_examinations]
+directory = {{ repo_path }}
+user = personnel_testing
+command = {{ virtualenv_python }} manage.py fix_expired_user_examinations --infinite
+stdout_logfile = /var/log/personnel_testing/fix_expired_user_examinations.log
+stderr_logfile = /var/log/personnel_testing/fix_expired_user_examinations.log
+
+[program:personnel_testing_fix_started_user_examinations]
+directory = {{ repo_path }}
+user = personnel_testing
+command = {{ virtualenv_python }} manage.py fix_started_user_examinations --infinite
+stdout_logfile = /var/log/personnel_testing/fix_started_user_examinations.log
+stderr_logfile = /var/log/personnel_testing/fix_started_user_examinations.log
 

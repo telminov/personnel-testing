@@ -52,9 +52,9 @@
       sudo_user: personnel_testing
 
     - name: Create www log directory
-      file: path={{ log_path }}/www owner=www-data state=directory
+      file: path=/var/log/www/personnel_testing owner=www-data state=directory
 
-    - name: Create www directory for apache fastcgi
+    - name: Create www directory for nginx
       file: path=/var/www/personnel_testing owner=www-data state=directory
 
     - name: Remove old static files
@@ -66,11 +66,14 @@
     - name: Change www directory owner
       file: path=/var/www/personnel_testing owner=www-data state=directory recurse=yes
 
-    - name: Create apache cofig file
-      template: src=templates/apache2.jinja2 dest=/etc/apache2/sites-available/personnel_testing owner=root mode=0644
+    - name: Create nginx cofig file
+      template: src=templates/nginx.jinja2 dest=/etc/nginx/sites-available/personnel_testing owner=root mode=0644
 
-    - name: Restart apache2
-      service: name=apache2 state=restarted
+    - name: Create nginx cofig file link
+      file: src=/etc/nginx/sites-available/personnel_testing dest=/etc/nginx/sites-enabled/personnel_testing state=link owner=root mode=0644
+
+    - name: Restart nginx
+      service: name=nginx state=restarted
 
 
     - name: Copy supervisor personnel_testing conf
