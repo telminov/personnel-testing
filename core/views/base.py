@@ -1,3 +1,6 @@
+import datetime
+
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic import UpdateView, ListView as DjangoListView, DetailView as DjangoDetailView,\
     View as DjangoView, TemplateView as DjangoTemplateView, DeleteView as DjangoDeleteView
@@ -73,7 +76,12 @@ class CreateOrUpdateView(TitleMixin, UpdateView):
 
 
 class DeleteView(TitleMixin, DjangoDeleteView):
-    pass
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.deleted_at = datetime.datetime.now()
+        self.object.save()
+        return HttpResponseRedirect(success_url)
 
 
 class ListView(TitleMixin, DjangoListView):

@@ -26,6 +26,21 @@ class UserListView(ListView):
 user_list_view = UserListView.as_view()
 
 
+class UserDeletedListView(ListView):
+    model = User
+    context_object_name = 'users'
+    template_name = 'core/management/deleted_users.html'
+    title = 'Управление удалёнными пользователями'
+
+    def get_queryset(self):
+        return self.model.default_objects.filter(deleted_at__isnull=False)
+
+    def post(self):
+        pass
+
+user_deleted_list_view = UserDeletedListView.as_view()
+
+
 class UserCreateOrUpdateView(CreateOrUpdateView):
     model = User
     form_class_create = UserCreateForm
@@ -62,3 +77,8 @@ user_create_or_update_view = UserCreateOrUpdateView.as_view()
 
 class UserDeleteView(DeleteView):
     model = User
+    pk_url_kwarg = 'user_id'
+    success_url = reverse_lazy('user_list_view')
+    template_name = 'core/management/user_delete.html'
+    title = 'Удаление пользователя'
+user_delete_view = UserDeleteView.as_view()

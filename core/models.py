@@ -5,9 +5,10 @@ import string
 
 import random
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models import DO_NOTHING, Q
+from core.managers import UserDefaultManager, UserExcludeDeletedManager
 
 from core.fields import JSONField
 from django.forms import model_to_dict
@@ -19,8 +20,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, db_index=True)
 
-    objects = UserManager()
+    objects = UserExcludeDeletedManager()
+    default_objects = UserDefaultManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']

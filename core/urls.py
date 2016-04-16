@@ -18,8 +18,10 @@ urlpatterns = [
     url(r'^adm/departments/(?P<department_id>\d+)/$', report.department_users_list_view, name='department_users_list_view'),
     url(r'^adm/departments/(?P<department_id>\d+)/(?P<user_id>\d+)/$', report.department_user_examinations_list_view, name='department_user_examinations_list_view'),
 
+    url(r'^adm/users/(?P<user_id>\d+)/delete/$', user.user_delete_view, name='user_delete_view'),
     url(r'^adm/users/(?P<user_id>\d+)/$', user.user_create_or_update_view, name='user_update_view'),
     url(r'^adm/users/create/$', user.user_create_or_update_view, name='user_create_view'),
+    url(r'^adm/users/deleted/$', user.user_deleted_list_view, name='user_deleted_list_view'),
     url(r'^adm/users/$', user.user_list_view, name='user_list_view'),
 
     url(r'^adm/scheduler/(?P<scheduler_id>\d+)/detail/$', scheduler.scheduler_detail_view, name='scheduler_detail_view'),
