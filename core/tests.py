@@ -235,3 +235,203 @@ class MainTestCase(TestCase):
     #     self.assertEqual(response_data['username'], new_user.username)
     #     self.assertEqual(response_data['email'], new_user.email)
     #     self.assertTrue(new_user.check_password(response_data['password']))
+
+    def test_user_list_view(self):
+        url = reverse('user_list_view')
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        user = User.objects.create(username="TestUser", email='test@test.ru')
+        user.set_password('123')
+        user.save()
+
+        self.client.login(username=user.username, password='123')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        user.is_staff = True
+        user.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        user2 = User.objects.create(username="TestUser2")
+        department = Department.objects.create(name='Test')
+
+        response = self.client.get(url)
+        self.assertIn(user, response.context['users'])
+        self.assertIn(user2, response.context['users'])
+
+        p = {
+            'department': department.id
+        }
+
+        response = self.client.get(url, p)
+
+        self.assertNotIn(user, response.context['users'])
+        self.assertNotIn(user2, response.context['users'])
+
+        user.departments.add(department)
+        response = self.client.get(url, p)
+        self.assertIn(user, response.context['users'])
+        self.assertNotIn(user2, response.context['users'])
+
+    def test_user_create_view(self):
+        url = reverse('user_create_view')
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        user = User.objects.create(username="TestUser", email='test@test.ru')
+        user.set_password('123')
+        user.save()
+
+        self.client.login(username=user.username, password='123')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        user.is_staff = True
+        user.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        p = {}
+
+        response = self.client.post(url, p)
+        self.assertTrue(response.context['form'].errors)
+
+        p = {
+            'username': 'test'
+        }
+
+        response = self.client.post(url, p)
+        self.assertTrue(response.context['form'].errors)
+
+        p = {
+            'username': 'TestUser',  # Этот юзер уже создан.
+            'password': '123'
+        }
+
+        response = self.client.post(url, p)
+        self.assertTrue(response.context['form'].errors)
+
+        p = {
+            'username': 'Test',
+            'password': '123'
+        }
+
+        response = self.client.post(url, p)
+        self.assertIsNone(response.context)
+        user = User.objects.latest('id')
+        self.assertEqual(user.username, p['username'])
+        self.assertTrue(user.check_password(p['password']))
+
+        p = {
+            'username': 'Test1',
+            'password': '123',
+            'email': 'test.ru'
+        }
+
+        response = self.client.post(url, p)
+        self.assertTrue(response.context['form'].errors)
+
+        p = {
+            'username': 'Test1',
+            'password': '123',
+            'email': 'test@test.ru'
+        }
+
+        response = self.client.post(url, p)
+        self.assertTrue(response.context['form'].errors)
+
+        p = {
+            'username': 'Test1',
+            'password': '123',
+            'email': 'test@test.com'
+        }
+
+        response = self.client.post(url, p)
+        self.assertIsNone(response.context)
+        user = User.objects.latest('id')
+        self.assertEqual(user.email, p['email'])
+
+        department = Department.objects.create(name='Test')
+
+        p = {
+            'username': 'Test2',
+            'password': '123',
+            'email': 'test1@test.com',
+            'departments': [department.id]
+        }
+
+        response = self.client.post(url, p)
+        self.assertIsNone(response.context)
+        user = User.objects.latest('id')
+        self.assertIn(department, user.departments.all())
+
+        p = {
+            'username': 'Test3',
+            'password': '123',
+            'email': 'test2@test.com',
+            'departments': [department.id],
+            'is_staff': True
+        }
+
+        response = self.client.post(url, p)
+        self.assertIsNone(response.context)
+        user = User.objects.latest('id')
+        self.assertTrue(user.is_staff)
+
+    def test_user_update_view(self):
+        user = User.objects.create(username="TestUser", email='test@test.ru')
+        user.set_password('123')
+        user.save()
+        url = reverse('user_update_view', args=[user.id])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        self.client.login(username=user.username, password='123')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        user.is_staff = True
+        user.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        department = Department.objects.create(name='Test')
+        p = {
+            'username': 'Test1',
+            'email': 'test2@test.com',
+            'departments': [department.id]
+        }
+
+        response = self.client.post(url, p)
+        self.assertIsNone(response.context)
+        user = User.objects.latest('id')
+        self.assertEqual(user.username, p['username'])
+        self.assertEqual(user.email, p['email'])
+        self.assertIn(department, user.departments.all())
+
+        p = {
+            'is_staff': False
+        }
+        response = self.client.post(url, p)
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.latest('id')
+        self.assertFalse(user.is_staff)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
