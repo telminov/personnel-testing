@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models import DO_NOTHING, Q
-from core.managers import UserDefaultManager, UserExcludeDeletedManager
+from core.managers import UserDefaultManager, UserExcludeDeletedManager, DefaultManager, ExcludeDeletedManager
 
 from core.fields import JSONField
 from django.forms import model_to_dict
@@ -79,6 +79,10 @@ class Examination(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
     minutes_to_pass = models.PositiveSmallIntegerField(default=30, verbose_name='Сколько минут дано на тест')
     department = models.ForeignKey(Department, related_name='examinations', verbose_name='Отдел')
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     def __unicode__(self):
         return self.name

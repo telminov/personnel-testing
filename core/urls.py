@@ -36,8 +36,10 @@ urlpatterns = [
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/(?P<question_id>\d+)/$', examinations.examination_question_create_or_update_view, name='examination_question_update_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/create/$', examinations.examination_question_create_or_update_view, name='examination_question_create_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/$', examinations.examination_question_list_view, name='examination_question_list_view'),
+    url(r'^adm/examination/(?P<examination_id>\d+)/delete/$', examinations.examination_delete_view, name='examination_delete_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/$', examinations.examination_create_or_update_view, name='examination_update_view'),
     url(r'^adm/examination/create/$', examinations.examination_create_or_update_view, name='examination_create_view'),
+    url(r'^adm/examination/deleted/$', examinations.examination_deleted_list_view, name='examination_deleted_list_view'),
     url(r'^adm/examination/$', examinations.examination_list_view, name='adm_examination_list_view'),
 
     url(r'^adm/user_examination/(?P<user_examination_id>\d+)/$', user_examinations.user_examination_create_or_update_view, name='adm_user_examination_update_view'),

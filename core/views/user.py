@@ -37,7 +37,6 @@ class UserDeletedListView(ListView):
 
     def post(self):
         pass
-
 user_deleted_list_view = UserDeletedListView.as_view()
 
 
