@@ -2,9 +2,10 @@
 
 {% block content %}
     {% load bootstrap3 %}
-            <a href="{% url 'adm_examination_list_view' %}" type="submit" class="btn btn-warning pull-left">
-              {% bootstrap_icon "repeat" %} Назад
-            </a>
+    <a href="{% url 'adm_examination_list_view' %}" type="submit" class="btn btn-warning pull-right">
+        {% bootstrap_icon "repeat" %} Назад
+    </a>
+    <br/><br/>
 {% block table %}
     <table class="table table-striped table-bordered">
         <thead>

@@ -63,6 +63,9 @@ class Department(models.Model):
     responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True,
                                          verbose_name='Ответственные')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     def __unicode__(self):
         return self.name

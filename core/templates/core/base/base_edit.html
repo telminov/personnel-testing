@@ -15,9 +15,6 @@
                 <button type="submit" class="btn btn-success">
                     {% bootstrap_icon "floppy-save" %} Сохранить
                 </button>
-                <a class="btn btn-danger pull-right" href="{% url 'user_delete_view' user.id %}">
-                     Удалить {% bootstrap_icon "trash" %}
-                </a>
             {% endbuttons %}
         {% endblock buttons %}
 

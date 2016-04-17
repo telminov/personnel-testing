@@ -46,7 +46,9 @@ urlpatterns = [
     url(r'^adm/user_examination/create/$', user_examinations.user_examination_create_or_update_view, name='adm_user_examination_create_view'),
     url(r'^adm/user_examination/$', user_examinations.user_examination_list_view, name='adm_user_examination_list_view'),
 
+    url(r'^adm/department/(?P<department_id>\d+)/delete/$', department.department_delete_view, name='department_delete_view'),
     url(r'^adm/department/(?P<department_id>\d+)/$', department.department_create_or_update_view, name='department_update_view'),
     url(r'^adm/department/create/$', department.department_create_or_update_view, name='department_create_view'),
+    url(r'^adm/department/deleted/$', department.department_deleted_list_view, name='department_deleted_list_view'),
     url(r'^adm/department/$', department.department_list_view, name='department_list_view'),
 ]

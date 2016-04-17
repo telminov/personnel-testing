@@ -44,7 +44,7 @@ class UserCreateOrUpdateView(CreateOrUpdateView):
     model = User
     form_class_create = UserCreateForm
     form_class_update = UserUpdateForm
-    template_name = 'core/base/base_edit.html'
+    template_name = 'core/management/user_edit.html'
     pk_url_kwarg = 'user_id'
     success_url = reverse_lazy('user_list_view')
 

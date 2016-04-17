@@ -1,0 +1,12 @@
+{% extends 'core/base/base_edit.html' %}
+
+{% block content %}
+    {% load bootstrap3 %}
+    Вы действительно хотите удалить отдел {{ object }} ?
+    <form action="" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            {% bootstrap_icon "trash" %} Удалить
+        </button>
+    </form>
+{% endblock content %}
