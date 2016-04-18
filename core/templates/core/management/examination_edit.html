@@ -10,11 +10,11 @@
             {% bootstrap_icon "repeat" %} Назад
         </a>
         {% if is_update %}
-            <a href="{% url 'examination_question_list_view' examination.id %}" class="btn btn-warning">
-                Перейти к вопросам тестирования {% bootstrap_icon "arrow-right" %}
-            </a>
             <a class="btn btn-danger pull-right" href="{% url 'examination_delete_view' examination.id %}">
                      Удалить {% bootstrap_icon "trash" %}
+            </a>
+            <a href="{% url 'examination_question_list_view' examination.id %}" class="btn btn-warning">
+                Перейти к вопросам тестирования {% bootstrap_icon "arrow-right" %}
             </a>
         {% endif %}
     {% endbuttons %}

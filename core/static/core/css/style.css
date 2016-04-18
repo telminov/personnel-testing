@@ -7,3 +7,6 @@ th.desc:after {
 .answer-form label {
     display: inline;
 }
+.pull-right + .pull-right {
+    margin-right: 10px;
+}
