@@ -14,7 +14,7 @@
                 <th>Аттестаций</th>
                 <th>Не пройденые</th>
                 <th>Отделы</th>
-                <th>Действие</th>
+                <th>Удалён</th>
             </tr>
         </thead>
     <tbody>
@@ -37,10 +37,11 @@
             <td>
                 {{ user.departments.all|join:', ' }}
             </td>
+            <td>
+            {{ user.deleted_at }}
+            </td>
         </tr>
-        <tr>
-            <a href=""></a>
-        </tr>
+
 
     {% endfor %}
     </tbody>

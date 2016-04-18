@@ -7,8 +7,8 @@ from core.models import User, Examination, Department, Scheduler, UserExaminatio
 
 
 class UserExaminationReportForm(forms.Form):
-    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.objects.all(), widget=Select2Widget)
-    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
+    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.default_objects.all(), widget=Select2Widget)
+    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.default_objects.all(), widget=Select2Widget)
 
 
 class UserSearchForm(forms.Form):

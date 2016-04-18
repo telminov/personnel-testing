@@ -12,6 +12,7 @@
                 <th>Название</th>
                 <th>Сотрудников</th>
                 <th>Ответственные</th>
+                <th>Удалён</th>
             </tr>
         </thead>
     <tbody>
@@ -19,13 +20,16 @@
     {% for department in departments %}
         <tr>
             <td>
-                <a href="{% url 'department_update_view' department.id %}">{{ department.name }}</a>
+                {{ department.name }}
             </td>
             <td>
                 {{ department.employees.count }}
             </td>
             <td>
                 {{ department.responsible.all|join:'<br/>' }}
+            </td>
+            <td>
+                {{ department.deleted_at }}
             </td>
         </tr>
     {% endfor %}

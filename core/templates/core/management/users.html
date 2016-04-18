@@ -7,12 +7,12 @@
         <button type="submit" class="btn btn-success">
             {% bootstrap_icon "search" %} Поиск
         </button>
-        <a href="{% url 'user_create_view' %}" type="submit" class="btn btn-info pull-right">
-          {% bootstrap_icon "plus" %} Добавить
-        </a>
+          <a href="{% url 'user_create_view' %}" type="submit" class="btn btn-info pull-right">
+            {% bootstrap_icon "plus" %} Добавить
+          </a>
           <a href="{% url 'user_deleted_list_view' %}" type="submit" class="btn btn-warning pull-right">
-          {% bootstrap_icon "repeat" %} Показать удалённых
-        </a>
+            {% bootstrap_icon "repeat" %} Показать удалённых
+          </a>
       {% endbuttons %}
         {% endblock buttons %}
 
