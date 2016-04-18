@@ -23,6 +23,7 @@
                 <th>Пользователь</th>
                 <th>Доступно от</th>
                 <th>Выполнить до</th>
+                <th>Создано</th>
                 <th>Действие</th>
             </tr>
         </thead>
@@ -42,6 +43,9 @@
                 </td>
                 <td>
                     {{ user_examination.complete_until }}
+                </td>
+                <td>
+                    {{ user_examination.scheduler|default:user_examination.created_by|default:"Неизвестно" }}
                 </td>
                 <td>
                     <a  href="{% url 'adm_user_examination_delete_view' user_examination.id %}">
