@@ -16,7 +16,7 @@ from django.forms import model_to_dict
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
-    email = models.EmailField(unique=True, blank=True)
+    email = models.EmailField(blank=True)
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
@@ -37,6 +37,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'пользователя'
         verbose_name_plural = 'Пользователи'
+
+    def save(self, *args, **kwargs):
+        same_email_users_qs = User.objects.filter(email=self.email)
+        if self.id:
+            same_email_users_qs = same_email_users_qs.exclude(id=self.id)
+
+        if self.email and same_email_users_qs.exists():
+            raise ValueError('email уже занят')
+        return super(User, self).save(*args, **kwargs)
 
     def set_random_password(self, commit=True):
         password = ''.join([random.choice(string.digits) for i in range(0, 10)])

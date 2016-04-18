@@ -28,6 +28,13 @@ class UserCreateForm(forms.ModelForm):
         model = User
         fields = ('username', 'email', 'password', 'departments',  'is_staff')
 
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email уже занят')
+        return email
+
+
 
 class SchedulerEditForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(label='Пользователи', required=False, queryset=User.objects.all(), widget=Select2MultipleWidget)
@@ -84,6 +91,12 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'departments',  'is_staff')
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email уже занят')
+        return email
 
 
 class UserExaminationEditForm(forms.ModelForm):
