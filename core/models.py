@@ -5,9 +5,10 @@ import string
 
 import random
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models import DO_NOTHING, Q
+from core.managers import UserDefaultManager, UserExcludeDeletedManager, DefaultManager, ExcludeDeletedManager
 
 from core.fields import JSONField
 from django.forms import model_to_dict
@@ -15,12 +16,14 @@ from django.forms import model_to_dict
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
-    email = models.EmailField(unique=True, blank=True)
+    email = models.EmailField(blank=True)
     is_staff = models.BooleanField(default=False, verbose_name='Доступ в административную часть')
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, db_index=True)
 
-    objects = UserManager()
+    objects = UserExcludeDeletedManager()
+    default_objects = UserDefaultManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -34,6 +37,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'пользователя'
         verbose_name_plural = 'Пользователи'
+
+    def save(self, *args, **kwargs):
+        same_email_users_qs = User.objects.filter(email=self.email)
+        if self.id:
+            same_email_users_qs = same_email_users_qs.exclude(id=self.id)
+
+        if self.email and same_email_users_qs.exists():
+            raise ValueError('email уже занят')
+        return super(User, self).save(*args, **kwargs)
 
     def set_random_password(self, commit=True):
         password = ''.join([random.choice(string.digits) for i in range(0, 10)])
@@ -60,6 +72,10 @@ class Department(models.Model):
     responsible = models.ManyToManyField(User, related_name='departments_owner', blank=True,
                                          verbose_name='Ответственные')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     def __unicode__(self):
         return self.name
@@ -76,6 +92,10 @@ class Examination(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
     minutes_to_pass = models.PositiveSmallIntegerField(default=30, verbose_name='Сколько минут дано на тест')
     department = models.ForeignKey(Department, related_name='examinations', verbose_name='Отдел')
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     def __unicode__(self):
         return self.name
@@ -136,6 +156,10 @@ class UserExamination(models.Model):
     finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     class Meta:
         verbose_name = 'тестирование пользователя'

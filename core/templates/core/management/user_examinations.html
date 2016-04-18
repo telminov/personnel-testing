@@ -6,8 +6,11 @@
         <button type="submit" class="btn btn-success">
             {% bootstrap_icon "search" %} Поиск
         </button>
-        <a href="{% url 'adm_user_examination_create_view' %}" type="submit" class="btn btn-info pull-right">
+        <a href="{% url 'adm_user_examination_create_view' %}" type="submit" class="btn btn-default pull-right">
             {% bootstrap_icon "plus" %} Добавить
+        </a>
+        <a href="{% url 'adm_user_examination_deleted_list_view' %}" type="submit" class="btn btn-default pull-right">
+            {% bootstrap_icon "repeat" %} Показать удалённых
         </a>
     {% endbuttons %}
 {% endblock buttons %}
@@ -20,6 +23,8 @@
                 <th>Пользователь</th>
                 <th>Доступно от</th>
                 <th>Выполнить до</th>
+                <th>Создано</th>
+                <th>Действие</th>
             </tr>
         </thead>
         <tbody>
@@ -38,6 +43,14 @@
                 </td>
                 <td>
                     {{ user_examination.complete_until }}
+                </td>
+                <td>
+                    {{ user_examination.scheduler|default:user_examination.created_by|default:"Неизвестно" }}
+                </td>
+                <td>
+                    <a  href="{% url 'adm_user_examination_delete_view' user_examination.id %}">
+                        {% bootstrap_icon "trash" %}
+                    </a>
                 </td>
             </tr>
 

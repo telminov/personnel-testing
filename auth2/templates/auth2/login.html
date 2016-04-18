@@ -12,18 +12,16 @@
 <body>
 
 <div class="container">
+    {% load bootstrap3 %}
     <form role="form" class="form-signin" method="POST">{% csrf_token %}
-        {% if form.errors %}
-            <div class="alert alert-danger">
-                {{ form.errors.values|join:'<br/>' }}
-            </div>
-        {% endif %}
-        {% for field in form %}
-            {{ field }}
-        {% endfor %}
-        <input type="submit" class="btn btn-lg btn-primary btn-block" value='Войти'/>
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% block buttons %}
+            {% buttons %}
+                <input type="submit" class="btn btn-lg btn-primary btn-block" value='Войти'/>
+            {% endbuttons %}
+        {% endblock buttons %}
     </form>
-
 </div>
 
 </body>

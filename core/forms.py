@@ -7,8 +7,8 @@ from core.models import User, Examination, Department, Scheduler, UserExaminatio
 
 
 class UserExaminationReportForm(forms.Form):
-    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.objects.all(), widget=Select2Widget)
-    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.objects.all(), widget=Select2Widget)
+    user = forms.ModelChoiceField(label='Пользователь', required=False, queryset=User.default_objects.all(), widget=Select2Widget)
+    examination = forms.ModelChoiceField(label='Тестирование', required=False, queryset=Examination.default_objects.all(), widget=Select2Widget)
 
 
 class UserSearchForm(forms.Form):
@@ -27,6 +27,13 @@ class UserCreateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'departments',  'is_staff')
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email уже занят')
+        return email
+
 
 
 class SchedulerEditForm(forms.ModelForm):
@@ -84,6 +91,12 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'departments',  'is_staff')
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email уже занят')
+        return email
 
 
 class UserExaminationEditForm(forms.ModelForm):

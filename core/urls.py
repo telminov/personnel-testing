@@ -18,8 +18,10 @@ urlpatterns = [
     url(r'^adm/departments/(?P<department_id>\d+)/$', report.department_users_list_view, name='department_users_list_view'),
     url(r'^adm/departments/(?P<department_id>\d+)/(?P<user_id>\d+)/$', report.department_user_examinations_list_view, name='department_user_examinations_list_view'),
 
+    url(r'^adm/users/(?P<user_id>\d+)/delete/$', user.user_delete_view, name='user_delete_view'),
     url(r'^adm/users/(?P<user_id>\d+)/$', user.user_create_or_update_view, name='user_update_view'),
     url(r'^adm/users/create/$', user.user_create_or_update_view, name='user_create_view'),
+    url(r'^adm/users/deleted/$', user.user_deleted_list_view, name='user_deleted_list_view'),
     url(r'^adm/users/$', user.user_list_view, name='user_list_view'),
 
     url(r'^adm/scheduler/(?P<scheduler_id>\d+)/detail/$', scheduler.scheduler_detail_view, name='scheduler_detail_view'),
@@ -34,15 +36,21 @@ urlpatterns = [
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/(?P<question_id>\d+)/$', examinations.examination_question_create_or_update_view, name='examination_question_update_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/create/$', examinations.examination_question_create_or_update_view, name='examination_question_create_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/questions/$', examinations.examination_question_list_view, name='examination_question_list_view'),
+    url(r'^adm/examination/(?P<examination_id>\d+)/delete/$', examinations.examination_delete_view, name='examination_delete_view'),
     url(r'^adm/examination/(?P<examination_id>\d+)/$', examinations.examination_create_or_update_view, name='examination_update_view'),
     url(r'^adm/examination/create/$', examinations.examination_create_or_update_view, name='examination_create_view'),
+    url(r'^adm/examination/deleted/$', examinations.examination_deleted_list_view, name='examination_deleted_list_view'),
     url(r'^adm/examination/$', examinations.examination_list_view, name='adm_examination_list_view'),
 
     url(r'^adm/user_examination/(?P<user_examination_id>\d+)/$', user_examinations.user_examination_create_or_update_view, name='adm_user_examination_update_view'),
+    url(r'^adm/user_examination/(?P<user_examination_id>\d+)/delete/$', user_examinations.user_examination_delete_view, name='adm_user_examination_delete_view'),
     url(r'^adm/user_examination/create/$', user_examinations.user_examination_create_or_update_view, name='adm_user_examination_create_view'),
+    url(r'^adm/user_examination/deleted/$', user_examinations.user_examination_deleted_list_view, name='adm_user_examination_deleted_list_view'),
     url(r'^adm/user_examination/$', user_examinations.user_examination_list_view, name='adm_user_examination_list_view'),
 
+    url(r'^adm/department/(?P<department_id>\d+)/delete/$', department.department_delete_view, name='department_delete_view'),
     url(r'^adm/department/(?P<department_id>\d+)/$', department.department_create_or_update_view, name='department_update_view'),
     url(r'^adm/department/create/$', department.department_create_or_update_view, name='department_create_view'),
+    url(r'^adm/department/deleted/$', department.department_deleted_list_view, name='department_deleted_list_view'),
     url(r'^adm/department/$', department.department_list_view, name='department_list_view'),
 ]

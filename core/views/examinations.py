@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 
 from core.forms import ExaminationEditForm, ExaminationSearchForm, QuestionEditForm, AnswerEditForm
 from core.models import Examination, Question, Answer
-from core.views.base import CreateOrUpdateView, ListView, ParentListView, ParentCreateOrUpdateView
+from core.views.base import CreateOrUpdateView, ListView, ParentListView, ParentCreateOrUpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 
 
@@ -151,3 +151,28 @@ def question_answer_delete_view(request, examination_id, question_id, answer_id)
     Answer.objects.get(question=question, id=answer_id).delete()
     messages.success(request, 'Ответ успешно удален')
     return redirect(reverse('examination_question_update_view', args=[examination_id, question_id]))
+
+
+class ExaminationDeleteView(DeleteView):
+    model = Examination
+    pk_url_kwarg = 'examination_id'
+    success_url = reverse_lazy('adm_examination_list_view')
+    template_name = 'core/management/examination_delete.html'
+    title = 'Удаление тестирования'
+examination_delete_view = ExaminationDeleteView.as_view()
+
+
+class ExaminationDeletedListView(ListView):
+    model = Examination
+    context_object_name = 'examinations'
+    template_name = 'core/management/examinations_deleted.html'
+    title = 'Управление удалёнными тестированиями'
+
+    def get_queryset(self):
+        return self.model.default_objects.filter(deleted_at__isnull=False)
+
+    def post(self):
+        pass
+examination_deleted_list_view = ExaminationDeletedListView.as_view()
+
+

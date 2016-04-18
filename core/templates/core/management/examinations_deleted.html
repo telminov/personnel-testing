@@ -1,18 +1,11 @@
 {% extends 'core/base/base_list.html' %}
 
-
-    {% block buttons %}
+{% block content %}
     {% load bootstrap3 %}
-      {% buttons layout='horizontal' %}
-          <a href="{% url 'examination_deleted_list_view' %}" type="submit" class="btn btn-default pull-right">
-          {% bootstrap_icon "repeat" %} Показать удалённые
-        </a>
-        <a href="{% url 'examination_create_view' %}" type="submit" class="btn btn-default pull-right">
-          {% bootstrap_icon "plus" %} Добавить
-        </a>
-      {% endbuttons %}
-        {% endblock buttons %}
-
+    <a href="{% url 'adm_examination_list_view' %}" type="submit" class="btn btn-warning pull-right">
+        {% bootstrap_icon "repeat" %} Назад
+    </a>
+    <br/><br/>
 {% block table %}
     <table class="table table-striped table-bordered">
         <thead>
@@ -21,7 +14,7 @@
                 <th>Отдел</th>
                 <th>Вопросов</th>
                 <th>Минут на выполнение</th>
-                <th>Действия</th>
+                <th>Удалён</th>
             </tr>
         </thead>
     <tbody>
@@ -30,7 +23,7 @@
 
         <tr>
             <td>
-                <a href="{% url 'examination_update_view' examination.id %}">{{ examination.name }}</a>
+                {{ examination.name }}
             </td>
             <td>
                 {{ examination.department }}
@@ -42,7 +35,7 @@
                 {{ examination.minutes_to_pass }}
             </td>
             <td>
-                <a href="{% url 'adm_user_examination_create_view'%}?examination={{ examination.id }}">Назначить вручную</a>
+                {{ examination.deleted_at }}
             </td>
         </tr>
 
@@ -51,3 +44,4 @@
     </table>
 
 {% endblock table %}
+{%  endblock content %}
