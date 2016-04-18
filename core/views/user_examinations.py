@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 
 from core.forms import UserExaminationSearchForm, UserExaminationEditForm
 from core.models import UserExamination, Examination
-from core.views.base import CreateOrUpdateView, ListView
+from core.views.base import CreateOrUpdateView, ListView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 
 
@@ -34,8 +34,9 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
     model = UserExamination
     form_class_create = UserExaminationEditForm
     form_class_update = UserExaminationEditForm
-    template_name = 'core/base/base_edit.html'
+    template_name = 'core/management/user_examination_edit.html'
     pk_url_kwarg = 'user_examination_id'
+    title = 'Создание тестирования пользователя'
     success_url = reverse_lazy('adm_user_examination_list_view')
 
     def get_initial(self):
@@ -50,3 +51,26 @@ class UserExaminationCreateOrUpdateView(CreateOrUpdateView):
         self.object.save()
         return redirect(self.get_success_url())
 user_examination_create_or_update_view = UserExaminationCreateOrUpdateView.as_view()
+
+
+class UserExaminationDeleteView(DeleteView):
+    model = UserExamination
+    pk_url_kwarg = 'user_examination_id'
+    success_url = reverse_lazy('adm_user_examination_list_view')
+    template_name = 'core/management/user_examination_delete.html'
+    title = 'Удаление тестирования'
+user_examination_delete_view = UserExaminationDeleteView.as_view()
+
+
+class UserExaminationDeletedListView(ListView):
+    model = UserExamination
+    context_object_name = 'user_examinations'
+    template_name = 'core/management/user_examination_deleted.html'
+    title = 'Управление удалёнными тестированиями'
+
+    def get_queryset(self):
+        return self.model.default_objects.filter(deleted_at__isnull=False)
+
+    def post(self):
+        pass
+user_examination_deleted_list_view = UserExaminationDeletedListView.as_view()

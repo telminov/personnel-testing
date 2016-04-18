@@ -64,6 +64,7 @@ class Department(models.Model):
                                          verbose_name='Ответственные')
     employees = models.ManyToManyField(User, related_name='departments', blank=True, verbose_name='Сотрудники отдела')
     deleted_at = models.DateTimeField(null=True, db_index=True)
+
     objects = ExcludeDeletedManager()
     default_objects = DefaultManager()
 
@@ -146,6 +147,10 @@ class UserExamination(models.Model):
     finished_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='Закончен')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, db_index=True)
+
+    objects = ExcludeDeletedManager()
+    default_objects = DefaultManager()
 
     class Meta:
         verbose_name = 'тестирование пользователя'

@@ -2,14 +2,14 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    Вы действительно хотите удалить {{ object }} ?
+    Вы действительно хотите удалить тестирование {{ object.examination }} для пользователя {{ object.user }}?
     </br></br>
     <form action="" method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">
             {% bootstrap_icon "trash" %} Удалить
         </button>
-        <a href="{% url 'user_update_view' user.id %}" type="submit" class="btn btn-warning pull-right">
+        <a href="{% url 'adm_user_examination_list_view' %}" type="submit" class="btn btn-warning pull-right">
             {% bootstrap_icon "repeat" %} Назад
         </a>
     </form>

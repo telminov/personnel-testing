@@ -3,10 +3,14 @@
 {% block content %}
     {% load bootstrap3 %}
     Вы действительно хотите удалить отдел {{ object }} ?
+    </br></br>
     <form action="" method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">
             {% bootstrap_icon "trash" %} Удалить
         </button>
+        <a href="{% url 'department_update_view' department.id %}" type="submit" class="btn btn-warning pull-right">
+        {% bootstrap_icon "repeat" %} Назад
+        </a>
     </form>
 {% endblock content %}

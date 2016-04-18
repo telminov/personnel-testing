@@ -37,7 +37,7 @@ class DepartmentDeleteView(DeleteView):
     model = Department
     pk_url_kwarg = 'department_id'
     success_url = reverse_lazy('department_list_view')
-    template_name = 'core/management/examination_delete.html'
+    template_name = 'core/management/department_delete.html'
     title = 'Удаление отдела'
 department_delete_view = DepartmentDeleteView.as_view()
 

@@ -1,0 +1,13 @@
+{% extends 'core/base/base_edit.html' %}
+
+{% block buttons %}
+    {% load bootstrap3 %}
+    {% buttons layout='horizontal' %}
+        <button type="submit" class="btn btn-success">
+            {% bootstrap_icon "floppy-save" %} Сохранить
+        </button>
+        <a href="{% url 'adm_user_examination_list_view' %}" type="submit" class="btn btn-warning pull-right">
+            {% bootstrap_icon "repeat" %} Назад
+        </a>
+    {% endbuttons %}
+{% endblock buttons %}
