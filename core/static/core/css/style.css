@@ -1,7 +1,7 @@
-th.asc:after {
+th.sorting_asc:after {
     content: '\0000a0\0025b2';
 }
-th.desc:after {
+th.sorting_desc:after {
     content: '\0000a0\0025bc';
 }
 .answer-form label {
