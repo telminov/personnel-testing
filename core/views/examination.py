@@ -23,7 +23,6 @@ def user_examination_list_view(request):
         'user_examinations_finished': UserExamination.get_for_user(request.user).filter(finished_at__isnull=False),
         'title': 'Список персональных аттестаций'
     }
-
     return render(request, 'core/examinations.html', context)
 
 

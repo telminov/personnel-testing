@@ -42,7 +42,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         same_email_users_qs = User.objects.filter(email=self.email)
         if self.id:
             same_email_users_qs = same_email_users_qs.exclude(id=self.id)
-
         if self.email and same_email_users_qs.exists():
             raise ValueError('email уже занят')
         return super(User, self).save(*args, **kwargs)

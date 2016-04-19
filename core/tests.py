@@ -422,6 +422,55 @@ class MainTestCase(TestCase):
         user = User.objects.latest('id')
         self.assertFalse(user.is_staff)
 
+    def test_user_examination_list_view(self):
+        admin = User.objects.create(username="TestAdmin", email='admin@test.ru', is_staff=True)
+        admin.set_password('123')
+        admin.save()
+
+        test_user = User.objects.create(username="TestUser", email='TestUser@test.ru')
+        test_user.set_password('321')
+        test_user.save()
+
+        now = datetime.datetime.now()
+        end_time = now + datetime.timedelta(hours=3)
+        department = Department.objects.create(name='TestDepartment')
+        examination = Examination.objects.create(name='TestExamination', department=department)
+        user_examination = UserExamination.objects.create(examination=examination, user=test_user, available_from=now,
+                                                          complete_until=end_time, created_by=admin)
+
+        start_time = now - datetime.timedelta(hours=4)
+        end_time = start_time + datetime.timedelta(hours=2)
+        finish_time = start_time + datetime.timedelta(hours=1)
+        user_examination_finished = UserExamination.objects.create(examination=examination, user=test_user, available_from=start_time,
+                                                                   complete_until=end_time, created_by=admin, finished_at=finish_time)
+
+        self.client.login(username=test_user.username, password='321')
+        url = reverse('user_examination_list_view')
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(user_examination, response.context['user_examinations'])
+        self.assertNotIn(user_examination_finished, response.context['user_examinations'])
+        self.assertIn(user_examination_finished, response.context['user_examinations_finished'])
+        self.assertNotIn(user_examination, response.context['user_examinations_finished'])
+
+        self.client.login(username=admin.username, password='123')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(user_examination, response.context['user_examinations'])
+        self.assertNotIn(user_examination_finished, response.context['user_examinations_finished'])
+
+    
+
+
+
+
+
+
+
+
+
+
 
 
 
