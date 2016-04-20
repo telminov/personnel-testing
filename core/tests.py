@@ -520,8 +520,8 @@ class MainTestCase(TestCase):
                     number_right_answer += 1
                 list_answers.append(dictionary['id'])
             if number_right_answer > 1:
-                number_random_answer = random.randint(2, len(list_answers))
-                random_answers = random.sample(list_answers, number_random_answer)
+                number_right_answers = random.randint(2, number_right_answer)
+                random_answers = random.sample(list_answers, number_right_answers)
                 for j in random_answers:
                     p['answer_id'].append(j)
             else:
@@ -537,6 +537,3 @@ class MainTestCase(TestCase):
             self.assertEqual(response.status_code, 302)
             response = self.client.get(response.url)
             self.assertEqual(response.status_code, 200)
-
-        points = UserExamination.objects.get(finished_at__isnull=False)
-        print(points.points)

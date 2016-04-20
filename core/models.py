@@ -290,7 +290,7 @@ class UserExamination(models.Model):
                 right_answers_user_count += answer.is_right
 
             if right_answers_user_count > 0:
-                points += point_for_one_right_answer * float(right_answers_count) / right_answers_user_count
+                points += point_for_one_right_answer * (float(right_answers_user_count) / right_answers_count)
 
         self.points = points
 
