@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json
+import random
 
 from core.models import Department, Examination, Scheduler, User, UserExamination, Question, Answer, UserExaminationQuestionLog, UserExaminationAnswerLog
 from django.core.urlresolvers import reverse
@@ -435,14 +436,18 @@ class MainTestCase(TestCase):
         end_time = now + datetime.timedelta(hours=3)
         department = Department.objects.create(name='TestDepartment')
         examination = Examination.objects.create(name='TestExamination', department=department)
-        user_examination = UserExamination.objects.create(examination=examination, user=test_user, available_from=now,
-                                                          complete_until=end_time, created_by=admin)
+        user_examination = UserExamination.objects.create(
+            examination=examination, user=test_user, available_from=now,
+            complete_until=end_time, created_by=admin
+        )
 
         start_time = now - datetime.timedelta(hours=4)
         end_time = start_time + datetime.timedelta(hours=2)
         finish_time = start_time + datetime.timedelta(hours=1)
-        user_examination_finished = UserExamination.objects.create(examination=examination, user=test_user, available_from=start_time,
-                                                                   complete_until=end_time, created_by=admin, finished_at=finish_time)
+        user_examination_finished = UserExamination.objects.create(
+            examination=examination, user=test_user, available_from=start_time,
+            complete_until=end_time, created_by=admin, finished_at=finish_time
+        )
 
         self.client.login(username=test_user.username, password='321')
         url = reverse('user_examination_list_view')
@@ -457,30 +462,81 @@ class MainTestCase(TestCase):
         self.client.login(username=admin.username, password='123')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn(user_examination, response.context['user_examinations'])
-        self.assertNotIn(user_examination_finished, response.context['user_examinations_finished'])
+        self.assertFalse(response.context['user_examinations'])
+        self.assertFalse(response.context['user_examinations_finished'])
 
-    
+    def test_user_examination_process_view(self):
+        admin = User.objects.create(username="TestAdmin", email='admin@test.ru', is_staff=True)
+        admin.set_password('123')
+        admin.save()
 
+        test_user = User.objects.create(username="TestUser", email='TestUser@test.ru')
+        test_user.set_password('321')
+        test_user.save()
 
+        now = datetime.datetime.now()
+        end_time = now + datetime.timedelta(hours=3)
+        department = Department.objects.create(name='TestDepartment')
+        examination = Examination.objects.create(name='TestExamination', department=department)
+        test_user_examination = UserExamination.objects.create(
+            examination=examination, user=test_user, available_from=now,
+            complete_until=end_time, created_by=admin
+        )
+        ids = []
+        for i in range(10):
+            question = 'test text question ' + str(i+1)
+            Question.objects.create(body=question, examination=examination)
+            id_question = Question.objects.get(body=question, examination=examination).id
+            number_answers = random.randint(2, 9)
+            number_right_answer = random.randint(1, number_answers)
+            for j in range(number_answers):
+                answer = 'test answer ' + str(i+1) + ' ' + str(j+1)
+                Answer.objects.create(body=answer, question=Question.objects.get(id=id_question))
+                ids.append(Answer.objects.get(body=answer).id)
+            right_answers = random.sample(ids, number_right_answer)
+            for pk in right_answers:
+                answer = Answer.objects.get(id=pk)
+                answer.is_right = True
+                answer.save()
+            ids.clear()
 
+        self.client.login(username=test_user.username, password='321')
+        url = reverse('user_examination_answer_view', args=[test_user_examination.id])
 
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(response.url)
+        self.assertEqual(response.status_code, 200)
 
+        for i in range(10):
+            p = {
+                'answer_id': []
+            }
+            list_answers = []
+            number_right_answer = 0
+            dictionaries = response.context['answers']
+            for dictionary in dictionaries:
+                if dictionary['is_right'] is True:
+                    number_right_answer += 1
+                list_answers.append(dictionary['id'])
+            if number_right_answer > 1:
+                number_random_answer = random.randint(2, len(list_answers))
+                random_answers = random.sample(list_answers, number_random_answer)
+                for j in random_answers:
+                    p['answer_id'].append(j)
+            else:
+                random_answer = random.choice(list_answers)
+                p['answer_id'].append(random_answer)
+            user_examination_question_log = UserExaminationQuestionLog.objects.get(
+                user_examination=test_user_examination, question=response.context['question']['id']
+            )
+            url = reverse('user_examination_answer_view', args=[test_user_examination.id, user_examination_question_log.id])
+            response = self.client.post(url, p)
+            self.assertEqual(response.status_code, 302)
+            response = self.client.get(response.url)
+            self.assertEqual(response.status_code, 302)
+            response = self.client.get(response.url)
+            self.assertEqual(response.status_code, 200)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        points = UserExamination.objects.get(finished_at__isnull=False)
+        print(points.points)
