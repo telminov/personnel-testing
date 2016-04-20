@@ -15,6 +15,7 @@
                 <th>Не пройденые</th>
                 <th>Отделы</th>
                 <th>Удалён</th>
+                <th>Вернуть</th>
             </tr>
         </thead>
     <tbody>
@@ -38,7 +39,10 @@
                 {{ user.departments.all|join:', ' }}
             </td>
             <td>
-            {{ user.deleted_at }}
+                {{ user.deleted_at }}
+            </td>
+            <td>
+                <a href="{% url 'user_undelete_view' user.id %}">Восстановить</a>
             </td>
         </tr>
 

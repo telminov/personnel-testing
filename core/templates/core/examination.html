@@ -23,6 +23,20 @@
     <script>
         $('.answer-input').click(function(){
             $('input[type="submit"]').prop("disabled", false)
-        })
+        });
+
+        var rightAnswersCount = {{ right_answers_count }};
+        if (rightAnswersCount && rightAnswersCount > 1) {
+            $(document).on('change', '.answer-input', function () {
+
+                var answersInputChecked = $('.answer-input:checked');
+                if (answersInputChecked.length >= rightAnswersCount){
+                    $('.answer-input:not(:checked)').attr('disabled', 'disabled')
+                } else {
+                    $('.answer-input').removeAttr('disabled')
+                }
+            })
+        }
+
     </script>
 {% endblock js %}

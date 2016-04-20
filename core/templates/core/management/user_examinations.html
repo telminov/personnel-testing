@@ -33,7 +33,7 @@
 
             <tr>
                 <td>
-                    {{ user_examination.examination }}
+                    <a href="{% url 'user_examination_detail_view' user_examination.id %}">{{ user_examination.examination }}</a>
                 </td>
                 <td>
                     {{ user_examination.user }}

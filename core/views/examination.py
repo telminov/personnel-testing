@@ -31,6 +31,13 @@ class UserExaminationProcessView(TemplateView):
     _user_examination_question_log = None
     template_name = 'core/examination.html'
 
+    def get_right_answers_count(self):
+        user_examination_question_log = self.get_user_examination_question_log()
+        question_answers = json.loads(user_examination_question_log.question_answers_data)
+
+        question_right_answers_ids = [qa['id'] for qa in question_answers if qa['is_right'] is True]
+        return len(question_right_answers_ids)
+
     def get_user_examination(self):
         if not self._user_examination:
             self._user_examination = UserExamination.get_for_user(
@@ -110,6 +117,9 @@ class UserExaminationProcessView(TemplateView):
         if len(question_right_answers_ids) == 1 and len(answers_ids) > 1:
             return redirect(redirect_to)
 
+        if len(question_right_answers_ids) > 1 and len(answers_ids) > len(question_right_answers_ids):
+            return redirect(redirect_to)
+
         for answer_id in answers_ids:
             answer_backuped_data = [
                 question_answer for question_answer in question_answers if question_answer['id'] == answer_id
@@ -146,7 +156,8 @@ class UserExaminationProcessView(TemplateView):
             'user_examination': user_examination,
             'question': json.loads(user_examination_question_log.question_data),
             'answers': json.loads(user_examination_question_log.question_answers_data),
-            'input_type': 'radio' if user_examination_question_log.get_right_answers_count() == 1 else 'checkbox'
+            'input_type': 'radio' if user_examination_question_log.get_right_answers_count() == 1 else 'checkbox',
+            'right_answers_count': self.get_right_answers_count()
         })
         return context
 user_examination_process_view = UserExaminationProcessView.as_view()

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.shortcuts import redirect
+
 from core.forms import UserCreateForm, UserSearchForm, UserUpdateForm
 from core.models import User
 from core.views.base import CreateOrUpdateView, ListView, DeleteView
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 
 
 class UserListView(ListView):
@@ -81,3 +83,10 @@ class UserDeleteView(DeleteView):
     template_name = 'core/management/user_delete.html'
     title = 'Удаление пользователя'
 user_delete_view = UserDeleteView.as_view()
+
+
+def user_undelete_view(request, user_id):
+    user = User.default_objects.get(id=user_id)
+    user.deleted_at = None
+    user.save()
+    return redirect(reverse('user_list_view'))
