@@ -3,13 +3,12 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'n&9q=x3e5wdlw2w6+9)9_lz+7@xhr25-&d0dxd2v=hxa!p3o@!'
+SECRET_KEY = '123'
 
 DEBUG = True
 
 AUTH_USER_MODEL = 'core.User'
 
-ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = (
     'django.contrib.admin',
