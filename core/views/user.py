@@ -54,6 +54,7 @@ class UserCreateOrUpdateView(CreateOrUpdateView):
         initial = {}
         if self.is_update():
             initial['departments'] = self.get_object().departments.all()
+            initial['user_id'] = self.object.id
         return initial
 
     def form_valid(self, form, commit=True):

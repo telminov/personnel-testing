@@ -1,10 +1,7 @@
 # -*- coding:utf-8 -*-
 from __future__ import unicode_literals
 
-try:
-    from urllib.parse import urlparse, urlunparse
-except ImportError:     # Python 2
-    from urlparse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse
 
 from django.template.response import TemplateResponse
 from django.utils.http import *

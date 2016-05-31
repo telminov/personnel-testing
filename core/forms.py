@@ -94,7 +94,11 @@ class UserUpdateForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip()
-        if email and User.objects.filter(email=email).exists():
+        id = self.initial['user_id']
+        same_email_users_qs = User.objects.filter(email=email)
+        if id:
+            same_email_users_qs = same_email_users_qs.exclude(id=id)
+        if email and same_email_users_qs:
             raise forms.ValidationError('Email уже занят')
         return email
 
