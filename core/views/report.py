@@ -18,7 +18,7 @@ class UserExaminationReportListView(ListView):
         if self.request.GET.get('user'):
             qs = qs.filter(user=self.request.GET['user'])
         if self.request.GET.get('examination'):
-            qs = qs.filter(user=self.request.GET['examination'])
+            qs = qs.filter(examination=self.request.GET['examination'])
         return qs
 
     def get_context_data(self, **kwargs):

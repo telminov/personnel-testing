@@ -14,6 +14,8 @@ from core.fields import JSONField
 from django.forms import model_to_dict
 
 
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True, verbose_name='Логин пользователя')
     email = models.EmailField(blank=True)
