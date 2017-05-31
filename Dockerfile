@@ -25,11 +25,10 @@ VOLUME /data/
 VOLUME /conf/
 VOLUME /static/
 
-CMD test "$(ls /conf/settings.py)" || cp project/settings.py /conf/settings.py; \
-    rm project/settings.py; ln -s /conf/settings.py project/settings.py; \
+CMD test "$(ls /conf/local_settings.py)" || cp project/local_settings.sample.py /conf/local_settings.py; \
+    rm project/local_settings.py;  ln -s /conf/local_settings.py project/local_settings.py; \
     rm -rf static; ln -s /static static; \
     python3 ./manage.py migrate; \
     python3 ./manage.py collectstatic --noinput; \
     /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon
-
 
