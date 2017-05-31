@@ -2,7 +2,7 @@ Django==1.9.5
 gunicorn==19.4.5
 python-dateutil==2.4.2
 ipython==4.1.2
-
+coveralls==1.1
 Django-Select2==5.8.2
 django-bootstrap3==7.0.0
 django-extensions==1.6.1
