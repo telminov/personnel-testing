@@ -109,3 +109,9 @@ CACHES = {
         'LOCATION': 'cache',
     }
 }
+
+try:
+    from project.local_settings import *
+except ImportError:
+    print("Warning: no local_settings.py")
+
